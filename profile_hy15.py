@@ -36,7 +36,8 @@ def main():
         fps=24,
         height=720,
         width=1280,
-        guidance_scale=1.0
+        guidance_scale=1.0,
+        num_inference_steps=50,
     )
     print("==================OUTPUT LOGGING INFO=====================")
     logging_info = result.get("logging_info") if isinstance(result, dict) else None
@@ -49,7 +50,7 @@ def main():
         for stage_name in stage_names
     ]
     for name, exec_time in zip(stage_names, stage_execution_times):
-        print(f"{name=} | {exec_time=}")
+        print(f"{name} | {exec_time * 1e3:.5f} ms")
     print("===========================================================")
 
 
