@@ -14,6 +14,7 @@ from fastvideo.pipelines.stages.denoising import (Cosmos25DenoisingStage,
                                                   CosmosDenoisingStage,
                                                   DenoisingStage,
                                                   DmdDenoisingStage)
+from fastvideo.pipelines.stages.sr_denoising import SRDenoisingStage
 from fastvideo.pipelines.stages.encoding import EncodingStage
 from fastvideo.pipelines.stages.image_encoding import (
     ImageEncodingStage, MatrixGameImageEncodingStage, RefImageEncodingStage,
@@ -51,6 +52,7 @@ __all__ = [
     "MatrixGameCausalDenoisingStage",
     "CosmosDenoisingStage",
     "Cosmos25DenoisingStage",
+    "SRDenoisingStage",
     "EncodingStage",
     "DecodingStage",
     "ImageEncodingStage",

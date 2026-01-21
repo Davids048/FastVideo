@@ -5,7 +5,7 @@ from typing import Any
 
 from fastvideo.configs.sample.hunyuan import (FastHunyuanSamplingParam,
                                               HunyuanSamplingParam)
-from fastvideo.configs.sample.hunyuan15 import Hunyuan15_480P_SamplingParam, Hunyuan15_720P_SamplingParam
+from fastvideo.configs.sample.hunyuan15 import Hunyuan15_480P_SamplingParam, Hunyuan15_720P_SamplingParam, Hunyuan15_SR_1080P_SamplingParam, Hunyuan15_720P_Distilled_I2V_SamplingParam
 from fastvideo.configs.sample.stepvideo import StepVideoT2VSamplingParam
 
 from fastvideo.configs.sample.cosmos import Cosmos_Predict2_2B_Video2World_SamplingParam
@@ -48,6 +48,10 @@ SAMPLING_PARAM_REGISTRY: dict[str, Any] = {
     Hunyuan15_480P_SamplingParam,
     "hunyuanvideo-community/HunyuanVideo-1.5-Diffusers-720p_t2v":
     Hunyuan15_720P_SamplingParam,
+    "/mnt/weka/home/hao.zhang/wei/HunyuanVideo-1.5-Diffusers-1080p":
+    Hunyuan15_SR_1080P_SamplingParam,
+    "hunyuanvideo-community/HunyuanVideo-1.5-Diffusers-720p_i2v_distilled":
+    Hunyuan15_720P_Distilled_I2V_SamplingParam,
     "FastVideo/stepvideo-t2v-diffusers":
     StepVideoT2VSamplingParam,
 

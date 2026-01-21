@@ -85,6 +85,11 @@ _SCHEDULERS = {
     ("schedulers", "scheduling_rcm", "RCMScheduler"),
 }
 
+_UPSAMPLERS = {
+    "SRTo720pUpsampler": ("upsamplers", "hunyuan15", "SRTo720pUpsampler"),
+    "SRTo1080pUpsampler": ("upsamplers", "hunyuan15", "SRTo1080pUpsampler"),
+}
+
 _FAST_VIDEO_MODELS = {
     **_TEXT_TO_VIDEO_DIT_MODELS,
     **_IMAGE_TO_VIDEO_DIT_MODELS,
@@ -92,6 +97,7 @@ _FAST_VIDEO_MODELS = {
     **_IMAGE_ENCODER_MODELS,
     **_VAE_MODELS,
     **_SCHEDULERS,
+    **_UPSAMPLERS,
 }
 
 _SUBPROCESS_COMMAND = [sys.executable, "-m", "fastvideo.models.dits.registry"]
