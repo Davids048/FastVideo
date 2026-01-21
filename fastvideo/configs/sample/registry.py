@@ -48,7 +48,7 @@ SAMPLING_PARAM_REGISTRY: dict[str, Any] = {
     Hunyuan15_480P_SamplingParam,
     "hunyuanvideo-community/HunyuanVideo-1.5-Diffusers-720p_t2v":
     Hunyuan15_720P_SamplingParam,
-    "/mnt/weka/home/hao.zhang/wei/HunyuanVideo-1.5-Diffusers-1080p":
+    "weizhou03/HunyuanVideo-1.5-Diffusers-1080p":
     Hunyuan15_SR_1080P_SamplingParam,
     "hunyuanvideo-community/HunyuanVideo-1.5-Diffusers-720p_i2v_distilled":
     Hunyuan15_720P_Distilled_I2V_SamplingParam,

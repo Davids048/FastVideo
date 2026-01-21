@@ -4,4 +4,6 @@ from fastvideo.configs.models.encoders.base import EncoderConfig
 from fastvideo.configs.models.vaes.base import VAEConfig
 from fastvideo.configs.models.upsamplers.base import UpsamplerConfig
 
-__all__ = ["ModelConfig", "VAEConfig", "DiTConfig", "EncoderConfig", "UpsamplerConfig"]
+__all__ = [
+    "ModelConfig", "VAEConfig", "DiTConfig", "EncoderConfig", "UpsamplerConfig"
+]
