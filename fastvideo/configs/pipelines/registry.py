@@ -35,7 +35,7 @@ PIPE_NAME_TO_CONFIG: dict[str, type[PipelineConfig]] = {
     "hunyuanvideo-community/HunyuanVideo": HunyuanConfig,
     "hunyuanvideo-community/HunyuanVideo-1.5-Diffusers-480p_t2v":
     Hunyuan15T2V480PConfig,
-    "weizhou03/HunyuanVideo-1.5-Diffusers-1080p": Hunyuan15SR1080PConfig,
+    "weizhou03/HunyuanVideo-1.5-Diffusers-1080p-2SR": Hunyuan15SR1080PConfig,
     "/mnt/weka/home/hao.zhang/wei/HunyuanVideo-1.5-Diffusers-1080p": Hunyuan15SR1080PConfig,
     "hunyuanvideo-community/HunyuanVideo-1.5-Diffusers-720p_t2v":
     Hunyuan15T2V720PConfig,

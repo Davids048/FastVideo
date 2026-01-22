@@ -79,6 +79,7 @@ class ComponentLoader(ABC):
             "scheduler": (SchedulerLoader, "diffusers"),
             "transformer": (TransformerLoader, "diffusers"),
             "transformer_2": (TransformerLoader, "diffusers"),
+            "transformer_3": (TransformerLoader, "diffusers"),
             "vae": (VAELoader, "diffusers"),
             "text_encoder": (TextEncoderLoader, "transformers"),
             "text_encoder_2": (TextEncoderLoader, "transformers"),
@@ -87,6 +88,7 @@ class ComponentLoader(ABC):
             "image_processor": (ImageProcessorLoader, "transformers"),
             "image_encoder": (ImageEncoderLoader, "transformers"),
             "upsampler": (UpsamplerLoader, "diffusers"),
+            "upsampler_2": (UpsamplerLoader, "diffusers"),
         }
 
         if module_type in module_loaders:
@@ -724,8 +726,12 @@ class UpsamplerLoader(ComponentLoader):
                 "Only diffusers format is supported."
             )
 
-        upsampler_cfg = fastvideo_args.pipeline_config.upsampler_config
-        upsampler_cfg.update_model_config(config_dict)
+        try:
+            upsampler_cfg = deepcopy(fastvideo_args.pipeline_config.upsampler_config[0])
+            upsampler_cfg.update_model_config(config_dict)
+        except Exception as e:
+            upsampler_cfg = deepcopy(fastvideo_args.pipeline_config.upsampler_config[1])
+            upsampler_cfg.update_model_config(config_dict)
 
         model_cls, _ = ModelRegistry.resolve_model_cls(class_name)
         model = model_cls(upsampler_cfg)
