@@ -1,6 +1,6 @@
 import os
 from fastvideo import VideoGenerator
-from fastvideo.profiler import get_global_controller
+
 
 prompt = (
     "A curious raccoon peers through a vibrant field of yellow sunflowers, its eyes "
@@ -8,16 +8,16 @@ prompt = (
     "natural light filtering through the petals. Mid-shot, warm and cheerful tones."
 )
 
-output_path = "outputs_video/hy15/output_hy15_t2v.mp4"
+output_path = "outputs_video/ltx2_basic/output_ltx2_distilled_t2v.mp4"
 
-def main():
+def main() -> None:
     os.environ["FASTVIDEO_STAGE_LOGGING"] = "1"
 
-    # Torch profiler for model loading (keep traces small; no shapes/stack/memory)
-    trace_dir = os.path.abspath("profile_hy15")
+    # Torch profiler for VAE decode (keep traces small; no shapes/stack/memory)
+    trace_dir = os.path.abspath("profile_ltx2")
     os.makedirs(trace_dir, exist_ok=True)
     # os.environ["FASTVIDEO_TORCH_PROFILER_DIR"] = trace_dir
-    # os.environ["FASTVIDEO_TORCH_PROFILE_REGIONS"] = "profiler_region_model_loading"
+    os.environ["FASTVIDEO_TORCH_PROFILE_REGIONS"] = "profiler_region_inference_decoding"
     os.environ["FASTVIDEO_TORCH_PROFILER_RECORD_SHAPES"] = "0"
     os.environ["FASTVIDEO_TORCH_PROFILER_WITH_PROFILE_MEMORY"] = "0"
     os.environ["FASTVIDEO_TORCH_PROFILER_WITH_STACK"] = "0"
@@ -26,12 +26,12 @@ def main():
     os.environ["FASTVIDEO_TORCH_PROFILER_WARMUP_STEPS"] = "0"
     os.environ["FASTVIDEO_TORCH_PROFILER_ACTIVE_STEPS"] = "1"
 
+
     generator = VideoGenerator.from_pretrained(
-        "hunyuanvideo-community/HunyuanVideo-1.5-Diffusers-720p_t2v",
-        # FastVideo will automatically handle distributed setup
-        num_gpus=4,
+        "FastVideo/LTX2-Distilled-Diffusers",
+        num_gpus=1,
         tp_size=1,
-        sp_size=4,
+        sp_size=1,
         use_fsdp_inference=False, # set to True if GPU is out of memory
         dit_cpu_offload=False,
         vae_cpu_offload=False,
@@ -40,7 +40,6 @@ def main():
         dit_layerwise_offload=False,
     )
 
-    
     for i in range(5):
         result = generator.generate_video(
             prompt,
@@ -50,8 +49,10 @@ def main():
             ##########
             num_frames=121,
             fps=24,
-            height=720,
-            width=1280,
+            height = 1024, # TODO: Make hw same between LTX2 and HY15
+            width = 1536,
+            # height=720,
+            # width=1280,
             guidance_scale=1.0,
             num_inference_steps=1,
         )
@@ -66,7 +67,7 @@ def main():
             for stage_name in stage_names
         ]
         for name, exec_time in zip(stage_names, stage_execution_times):
-            print(f"{name} | {exec_time * 1e3:.5f} ms")
+            print(f"{name}, {exec_time * 1e3:.5f}")
         print(f"=====================End LOGGING INFO {i=}=====================")
 
 
