@@ -503,6 +503,7 @@ class VAELoader(ComponentLoader):
         """Load the VAE based on the model path, and inference args."""
         config = get_diffusers_config(model=model_path)
         class_name = config.pop("_class_name")
+        config.pop("_name_or_path", None)
         assert class_name is not None, (
             "Model config does not contain a _class_name attribute. Only diffusers format is supported."
         )
@@ -573,6 +574,7 @@ class TransformerLoader(ComponentLoader):
         config = get_diffusers_config(model=model_path)
         hf_config = deepcopy(config)
         cls_name = config.pop("_class_name")
+        config.pop("_name_or_path", None)
         if cls_name is None:
             raise ValueError(
                 "Model config does not contain a _class_name attribute. "
@@ -587,7 +589,7 @@ class TransformerLoader(ComponentLoader):
         fastvideo_args.model_paths["transformer"] = model_path
 
         # Config from Diffusers supersedes fastvideo's model config
-        dit_config = fastvideo_args.pipeline_config.dit_config
+        dit_config = deepcopy(fastvideo_args.pipeline_config.dit_config)
         dit_config.update_model_arch(config)
 
         model_cls, _ = ModelRegistry.resolve_model_cls(cls_name)
