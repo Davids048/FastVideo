@@ -1,14 +1,28 @@
 import os
 from fastvideo import VideoGenerator
+from fastvideo.profiler import get_global_controller
 
 OUTPUT_PATH = "video_samples_hy15"
 def main():
     os.environ["FASTVIDEO_STAGE_LOGGING"] = "1"
 
+    # Torch profiler for VAE decode (keep traces small; no shapes/stack/memory)
+    trace_dir = os.path.abspath("profile")
+    os.makedirs(trace_dir, exist_ok=True)
+    os.environ["FASTVIDEO_TORCH_PROFILER_DIR"] = trace_dir
+    os.environ["FASTVIDEO_TORCH_PROFILE_REGIONS"] = "profiler_region_inference_decoding"
+    os.environ["FASTVIDEO_TORCH_PROFILER_RECORD_SHAPES"] = "0"
+    os.environ["FASTVIDEO_TORCH_PROFILER_WITH_PROFILE_MEMORY"] = "0"
+    os.environ["FASTVIDEO_TORCH_PROFILER_WITH_STACK"] = "0"
+    os.environ["FASTVIDEO_TORCH_PROFILER_WITH_FLOPS"] = "0"
+    os.environ["FASTVIDEO_TORCH_PROFILER_WAIT_STEPS"] = "1"
+    os.environ["FASTVIDEO_TORCH_PROFILER_WARMUP_STEPS"] = "0"
+    os.environ["FASTVIDEO_TORCH_PROFILER_ACTIVE_STEPS"] = "1"
+
     generator = VideoGenerator.from_pretrained(
         "hunyuanvideo-community/HunyuanVideo-1.5-Diffusers-720p_t2v",
         # FastVideo will automatically handle distributed setup
-        num_gpus=8,
+        num_gpus=4,
         use_fsdp_inference=False, # set to True if GPU is out of memory
         dit_cpu_offload=True,
         vae_cpu_offload=False,
@@ -16,7 +30,7 @@ def main():
         pin_cpu_memory=True, # set to false if low CPU RAM or hit obscure "CUDA error: Invalid argument"
         # image_encoder_cpu_offload=False,
         tp_size=1,
-        sp_size=8,
+        sp_size=4,
         dit_layerwise_offload=False,
     )
 
