@@ -50,10 +50,11 @@ def main():
             ##########
             num_frames=121,
             fps=24,
+            # Res: 1080P (1088 * 1920) | 720P (736 * 1280)
             height=720,
             width=1280,
             guidance_scale=1.0,
-            num_inference_steps=1,
+            num_inference_steps=1, # Default 50.
         )
         print(f"==================OUTPUT LOGGING INFO {i=}=====================")
         logging_info = result.get("logging_info") if isinstance(result, dict) else None

@@ -49,10 +49,10 @@ def main() -> None:
             ##########
             num_frames=121,
             fps=24,
-            height = 1024, # TODO: Make hw same between LTX2 and HY15
-            width = 1536,
-            # height=720,
-            # width=1280,
+            # height = 1088, # TODO: Make hw same between LTX2 and HY15
+            # width = 1920,
+            height=736,
+            width=1280,
             guidance_scale=1.0,
             num_inference_steps=1,
         )
