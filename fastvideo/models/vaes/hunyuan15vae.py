@@ -669,6 +669,7 @@ class AutoencoderKLHunyuanVideo15(nn.Module, ParallelTiledVAE):
         self.tile_sample_min_height = 256
         self.tile_sample_min_width = 256
         self.tile_sample_min_num_frames = 2000 # Fill in a random large number, as hy1.5 vae does not use temporal tiling
+        self.tile_sample_stride_num_frames = 2000 # Fill a large number to disable temporal tiling in parallel_tiled_decode.
 
     def _encode(self, x: torch.Tensor) -> torch.Tensor:
         x = self.encoder(x)
