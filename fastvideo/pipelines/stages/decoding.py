@@ -47,6 +47,11 @@ class DecodingStage(PipelineStage):
         result.add_check("output", batch.output, [V.is_tensor, V.with_dims(5)])
         return result
 
+    def _needs_main_pixel_decode(self, batch: ForwardBatch, fastvideo_args: FastVideoArgs) -> bool:
+        if fastvideo_args.output_type == "latent":
+            return False
+        return batch.save_video or batch.return_frames or batch.return_trajectory_decoded
+
     def _denormalize_latents(self, latents: torch.Tensor) -> torch.Tensor:
         """Convert normalized latents into the VAE's expected latent space."""
         # Some VAEs handle latent (de)normalization internally.
@@ -192,16 +197,19 @@ class DecodingStage(PipelineStage):
                 - output: Decoded frames (batch, channels, frames, height, width) as CPU float32
                 - trajectory_decoded (if requested): List of decoded frames per timestep
         """
+        needs_main_pixel_decode = self._needs_main_pixel_decode(batch, fastvideo_args)
+        needs_vae = needs_main_pixel_decode or batch.return_trajectory_decoded
+
         # load vae if not already loaded (used for memory constrained devices)
         pipeline = self.pipeline() if self.pipeline else None
-        if not fastvideo_args.model_loaded["vae"]:
+        if needs_vae and not fastvideo_args.model_loaded["vae"]:
             loader = VAELoader()
             self.vae = loader.load(fastvideo_args.model_paths["vae"], fastvideo_args)
             if pipeline:
                 pipeline.add_module("vae", self.vae)
             fastvideo_args.model_loaded["vae"] = True
 
-        frames = batch.latents if fastvideo_args.output_type == "latent" else self.decode(batch.latents, fastvideo_args)
+        frames = self.decode(batch.latents, fastvideo_args) if needs_main_pixel_decode else batch.latents
 
         # decode trajectory latents if needed
         if batch.return_trajectory_decoded:
@@ -235,10 +243,10 @@ class DecodingStage(PipelineStage):
         if hasattr(self, 'maybe_free_model_hooks'):
             self.maybe_free_model_hooks()
 
-        if fastvideo_args.vae_cpu_offload:
+        if needs_vae and fastvideo_args.vae_cpu_offload:
             self.vae.to("cpu")
 
-        if torch.backends.mps.is_available():
+        if needs_vae and torch.backends.mps.is_available():
             del self.vae
             if pipeline is not None and "vae" in pipeline.modules:
                 del pipeline.modules["vae"]
