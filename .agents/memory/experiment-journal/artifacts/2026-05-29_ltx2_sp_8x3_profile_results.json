@@ -1,0 +1,152 @@
+{
+  "date": "2026-05-29",
+  "experiment": "ltx2-distilled-sequence-parallel-8x3-profile",
+  "status": "running",
+  "target": {
+    "metric": "average video_generation_time",
+    "threshold_seconds": 4.2,
+    "acceptable_gpu_counts": [2, 4],
+    "saving_video_in_scope": false
+  },
+  "shared_config": {
+    "script": "examples/inference/basic/basic_ltx2_distilled_fast_profile.py",
+    "model_id": "FastVideo/LTX2-Distilled-Diffusers",
+    "model_root": "/home/hal-jundas/.local/share/huggingface/hub/models--FastVideo--LTX2-Distilled-Diffusers/snapshots/0762ece944ea65f45cd3318981423e1670ff7225",
+    "validation_json": "/home/hal-jundas/codes/FastVideo-ltx2-sp-profile/examples/training/finetune/ltx2/validation.json",
+    "height": 1088,
+    "width": 1920,
+    "num_frames": 121,
+    "fps": 24,
+    "num_inference_steps": 8,
+    "refine_num_inference_steps": 3,
+    "guidance_scale": 1.0,
+    "refine_guidance_scale": 1.0,
+    "refine_add_noise": true,
+    "attention_backend": "FLASH_ATTN",
+    "fp4_linear": false,
+    "nvfp4_fa4": false,
+    "torch_compile": true,
+    "compile_text_encoder": true,
+    "compile_vae": true,
+    "compile_backend": "inductor",
+    "compile_fullgraph": false,
+    "compile_dynamic": false,
+    "save_video": false,
+    "return_frames": false
+  },
+  "results": [
+    {
+      "name": "baseline_no_fp4_g1_compile_sp1_8x3_no_save",
+      "kind": "baseline",
+      "gpus": 1,
+      "sp_size": 1,
+      "measured_runs": 10,
+      "warmup_runs": 2,
+      "avg_generation_seconds": 6.533542936574667,
+      "avg_e2e_seconds": 6.634034795453772,
+      "avg_sr_seconds": 4.112411254411564,
+      "stage_times_seconds": {
+        "denoising_stage": 2.0059704404789955,
+        "ltx2_refine_denoising_stage": 4.076189891994,
+        "PostDecodeFrameProcessStage": 0.09985893983393908
+      },
+      "output_dir": "outputs_video/ltx2_sp_profile/steps8x3_baseline/baseline_no_fp4_g1_compile_sp1_8x3_no_save"
+    },
+    {
+      "name": "baseline_no_fp4_g2_compile_sp2_8x3_no_save",
+      "kind": "baseline",
+      "gpus": 2,
+      "sp_size": 2,
+      "measured_runs": 10,
+      "warmup_runs": 2,
+      "avg_generation_seconds": 5.541380187030882,
+      "avg_e2e_seconds": 5.636503921635449,
+      "avg_sr_seconds": 2.6411743651609867,
+      "stage_times_seconds": {
+        "denoising_stage": 2.469087200425565,
+        "ltx2_refine_denoising_stage": 2.6067392616532743,
+        "PostDecodeFrameProcessStage": 0.09459064193069935
+      },
+      "output_dir": "outputs_video/ltx2_sp_profile/steps8x3_baseline/baseline_no_fp4_g2_compile_sp2_8x3_no_save"
+    },
+    {
+      "name": "baseline_no_fp4_g4_compile_sp4_8x3_no_save",
+      "kind": "baseline",
+      "gpus": 4,
+      "sp_size": 4,
+      "measured_runs": 10,
+      "warmup_runs": 2,
+      "avg_generation_seconds": 4.335169820906595,
+      "avg_e2e_seconds": 4.432635242165998,
+      "avg_sr_seconds": 1.4957436725962907,
+      "stage_times_seconds": {
+        "denoising_stage": 2.407450876291841,
+        "ltx2_refine_denoising_stage": 1.4613636637572198,
+        "PostDecodeFrameProcessStage": 0.09699713573791087
+      },
+      "output_dir": "outputs_video/ltx2_sp_profile/steps8x3_baseline/baseline_no_fp4_g4_compile_sp4_8x3_no_save"
+    },
+    {
+      "name": "optimized_no_stage_logging_no_fp4_g4_compile_sp4_8x3_no_save",
+      "kind": "optimized",
+      "gpus": 4,
+      "sp_size": 4,
+      "measured_runs": 10,
+      "warmup_runs": 2,
+      "avg_generation_seconds": 4.276347050629556,
+      "avg_e2e_seconds": 4.376060059526935,
+      "avg_sr_seconds": null,
+      "stage_times_seconds": {},
+      "output_dir": "outputs_video/ltx2_sp_profile/steps8x3_optimized/optimized_no_stage_logging_no_fp4_g4_compile_sp4_8x3_no_save"
+    },
+    {
+      "name": "optimized_quiet_no_stage_logging_no_fp4_g4_compile_sp4_8x3_no_save",
+      "kind": "trial",
+      "gpus": 4,
+      "sp_size": 4,
+      "measured_runs": 10,
+      "warmup_runs": 2,
+      "avg_generation_seconds": 4.346188419638201,
+      "avg_e2e_seconds": 4.45666395239532,
+      "avg_sr_seconds": null,
+      "stage_times_seconds": {},
+      "output_dir": "outputs_video/ltx2_sp_profile/steps8x3_optimized/optimized_quiet_no_stage_logging_no_fp4_g4_compile_sp4_8x3_no_save"
+    },
+    {
+      "name": "trial_no_vae_compile_no_stage_logging_no_fp4_g4_compile_sp4_8x3_no_save",
+      "kind": "trial",
+      "gpus": 4,
+      "sp_size": 4,
+      "measured_runs": 3,
+      "warmup_runs": 2,
+      "avg_generation_seconds": 5.521017944750686,
+      "avg_e2e_seconds": 5.61647604778409,
+      "avg_sr_seconds": null,
+      "stage_times_seconds": {},
+      "output_dir": "outputs_video/ltx2_sp_profile/steps8x3_trials/trial_no_vae_compile_no_stage_logging_no_fp4_g4_compile_sp4_8x3_no_save"
+    },
+    {
+      "name": "trial_reduce_overhead_no_stage_logging_no_fp4_g4_compile_sp4_8x3_no_save",
+      "kind": "failed_trial",
+      "gpus": 4,
+      "sp_size": 4,
+      "measured_runs": 0,
+      "warmup_runs": 2,
+      "avg_generation_seconds": null,
+      "avg_e2e_seconds": null,
+      "avg_sr_seconds": null,
+      "failure": "TorchDynamo/CUDAGraph overwritten tensor error before measurements",
+      "output_dir": "outputs_video/ltx2_sp_profile/steps8x3_trials/trial_reduce_overhead_no_stage_logging_no_fp4_g4_compile_sp4_8x3_no_save"
+    }
+  ],
+  "best_measured": {
+    "name": "optimized_no_stage_logging_no_fp4_g4_compile_sp4_8x3_no_save",
+    "avg_generation_seconds": 4.276347050629556,
+    "misses_target_by_seconds": 0.07634705062955605
+  },
+  "pending_validation": [
+    "GPU timing for the VideoGenerator latency-only materialization skip",
+    "CUDA-node pytest for fastvideo/tests/entrypoints/test_video_generator.py"
+  ],
+  "slurm_issue": "srun on job 4745 failed because the job was expired/invalid or could not be confirmed; sbatch failed with Unable to contact slurm controller."
+}

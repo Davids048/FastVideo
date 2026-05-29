@@ -740,21 +740,29 @@ class VideoGenerator:
 
         thread = threading.Thread(target=execute_forward_thread)
         thread.start()
-        latent_batch_size = _infer_latent_batch_size(batch)
-        # When ``output_type == "latent"`` the forward output has latent
-        # shape (e.g. ``[B, C_latent, T_latent, H_latent, W_latent]``)
-        # rather than the pre-allocation's pixel shape. Skip the pinned
-        # ~50 MB buffer entirely; we always fall through to the
-        # ``samples = output_batch.output.cpu()`` branch below in that
-        # mode. ``skip_pixel_prealloc`` also gates the slow-path warning.
-        skip_pixel_prealloc = fastvideo_args.output_type == "latent"
-        if skip_pixel_prealloc:
-            samples = torch.empty(0, device='cpu')
+        # Only materialize decoded tensors on CPU when the caller needs frames
+        # or a file write. Latency-only runs otherwise paid for a CPU copy and
+        # RGB frame conversion whose results were discarded.
+        needs_output_materialization = batch.return_frames or batch.save_video
+        samples: torch.Tensor | None
+        if needs_output_materialization:
+            latent_batch_size = _infer_latent_batch_size(batch)
+            # When ``output_type == "latent"`` the forward output has latent
+            # shape (e.g. ``[B, C_latent, T_latent, H_latent, W_latent]``)
+            # rather than the pre-allocation's pixel shape. Skip the pinned
+            # ~50 MB buffer entirely; we always fall through to the
+            # ``samples = output_batch.output.cpu()`` branch below in that
+            # mode. ``skip_pixel_prealloc`` also gates the slow-path warning.
+            skip_pixel_prealloc = fastvideo_args.output_type == "latent"
+            if skip_pixel_prealloc:
+                samples = torch.empty(0, device='cpu')
+            else:
+                samples = torch.empty(
+                    (latent_batch_size, 3, sampling_param.num_frames, sampling_param.height, sampling_param.width),
+                    device='cpu',
+                    pin_memory=fastvideo_args.pin_cpu_memory)
         else:
-            samples = torch.empty(
-                (latent_batch_size, 3, sampling_param.num_frames, sampling_param.height, sampling_param.width),
-                device='cpu',
-                pin_memory=fastvideo_args.pin_cpu_memory)
+            samples = None
         thread.join()
 
         if thread_error["error"] is not None:
@@ -766,14 +774,20 @@ class VideoGenerator:
             raise RuntimeError("Forward execution returned no output tensor. "
                                "This usually means the executor/pipeline failed earlier.")
 
-        if output_batch.output.shape == samples.shape:
-            samples.copy_(output_batch.output)
-        else:
-            if not skip_pixel_prealloc:
-                logger.warning("Output shape %s does not match expected shape %s; use slow path",
-                               output_batch.output.shape, samples.shape)
-            samples = output_batch.output.cpu()
         logging_info = output_batch.logging_info
+
+        if needs_output_materialization:
+            assert samples is not None
+            if output_batch.output.shape == samples.shape:
+                samples.copy_(output_batch.output)
+            else:
+                if not skip_pixel_prealloc:
+                    logger.warning("Output shape %s does not match expected shape %s; use slow path",
+                                   output_batch.output.shape, samples.shape)
+                samples = output_batch.output.cpu()
+        else:
+            if output_batch.output.is_cuda:
+                torch.cuda.synchronize(output_batch.output.device)
 
         gen_time = time.perf_counter() - start_time
         logger.info("Generated successfully in %.2f seconds", gen_time)
@@ -794,9 +808,12 @@ class VideoGenerator:
 
         postprocess_start = time.perf_counter()
         frames: list[np.ndarray] | None
-        if is_latent_output or audio_only:
+        if not needs_output_materialization:
+            frames = None
+        elif is_latent_output or audio_only:
             frames = None if is_latent_output else []
         else:
+            assert samples is not None
             videos = rearrange(samples, "b c t h w -> t b c h w")
             frames = []
             for x in videos:

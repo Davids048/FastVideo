@@ -24,11 +24,14 @@ VALIDATION_JSON = (
 )
 DEFAULT_MODEL_ID = "FastVideo/LTX2-Distilled-Diffusers"
 DEFAULT_PROFILE_DIR = Path(os.getenv("LTX2_PROFILE_DIR", "outputs_video/ltx2_distilled_fast_profile"))
+DEFAULT_NUM_INFERENCE_STEPS = 8
+DEFAULT_REFINE_NUM_INFERENCE_STEPS = 3
 
 ENV_KEYS_TO_RECORD = (
     "CUDA_VISIBLE_DEVICES",
     "CUDA_CACHE_PATH",
     "FASTVIDEO_ATTENTION_BACKEND",
+    "FASTVIDEO_LOGGING_LEVEL",
     "FASTVIDEO_NVFP4_FA4",
     "FASTVIDEO_SR_LATENCY_STAGE_SUBSTR",
     "FASTVIDEO_STAGE_LOGGING",
@@ -52,6 +55,7 @@ ENV_KEYS_TO_RECORD = (
     "TORCHINDUCTOR_CACHE_DIR",
     "TRANSFORMERS_CACHE",
     "TRITON_CACHE_DIR",
+    "TQDM_DISABLE",
     "WORLD_SIZE",
     "XDG_CACHE_HOME",
 )
@@ -71,7 +75,7 @@ class Tee:
             stream.flush()
 
 
-def parse_args() -> argparse.Namespace:
+def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         description="Profile LTX-2 distilled inference with optional Ulysses sequence parallelism.",
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
@@ -92,10 +96,10 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--height", type=int, default=None)
     parser.add_argument("--width", type=int, default=None)
     parser.add_argument("--num-frames", type=int, default=121)
-    parser.add_argument("--num-inference-steps", type=int, default=5)
+    parser.add_argument("--num-inference-steps", type=int, default=DEFAULT_NUM_INFERENCE_STEPS)
     parser.add_argument("--fps", type=int, default=24)
     parser.add_argument("--guidance-scale", type=float, default=1.0)
-    parser.add_argument("--refine-num-inference-steps", type=int, default=2)
+    parser.add_argument("--refine-num-inference-steps", type=int, default=DEFAULT_REFINE_NUM_INFERENCE_STEPS)
     parser.add_argument("--refine-guidance-scale", type=float, default=1.0)
     parser.add_argument("--refine-add-noise", action=argparse.BooleanOptionalAction, default=True)
     parser.add_argument("--ltx2-vae-tiling", action=argparse.BooleanOptionalAction, default=False)
@@ -125,7 +129,13 @@ def parse_args() -> argparse.Namespace:
         help="Defaults to true for single-GPU and false when sequence parallelism is enabled.",
     )
     parser.add_argument("--compile-dynamic", action=argparse.BooleanOptionalAction, default=False)
-    return parser.parse_args()
+    parser.add_argument(
+        "--stage-logging",
+        action=argparse.BooleanOptionalAction,
+        default=True,
+        help="Enable per-stage timing logs. Disable for lowest-overhead latency runs.",
+    )
+    return parser.parse_args(argv)
 
 
 def validate_args(args: argparse.Namespace) -> None:
@@ -304,7 +314,7 @@ def resolve_refine_upsampler_path(model_root: str) -> Path:
 
 def configure_environment(args: argparse.Namespace) -> None:
     os.environ["FASTVIDEO_ATTENTION_BACKEND"] = args.attention_backend
-    os.environ["FASTVIDEO_STAGE_LOGGING"] = "1"
+    os.environ["FASTVIDEO_STAGE_LOGGING"] = "1" if args.stage_logging else "0"
     os.environ["FASTVIDEO_NVFP4_FA4"] = "1" if args.nvfp4_fa4 else "0"
     os.environ.setdefault("TOKENIZERS_PARALLELISM", "false")
     if args.nvfp4_fa4:
@@ -442,7 +452,11 @@ def build_profile_config(
             "width": width,
             "num_frames": args.num_frames,
             "num_inference_steps": args.num_inference_steps,
+            "refine_num_inference_steps": args.refine_num_inference_steps,
             "fps": args.fps,
+            "save_video": args.save_video,
+            "return_frames": args.return_frames,
+            "stage_logging_enabled": args.stage_logging,
             "linear_fp4_enabled": args.fp4_linear,
             "nvfp4_fa4_enabled": args.nvfp4_fa4,
             "torch_compile_enabled": args.torch_compile,
