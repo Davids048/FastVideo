@@ -1091,7 +1091,6 @@ class LTXDistributedAttention(DistributedAttention):
         )
         self.rope_type = rope_type
 
-    @torch.compiler.disable
     def forward(
         self,
         q: torch.Tensor,

@@ -1,0 +1,24 @@
+{
+  "averages": {
+    "e2e_latency": 502.30168167175725,
+    "non_stage_overhead": null,
+    "sr_forward_latency": null,
+    "stage_times": {},
+    "video_generation_time": 502.3009340548888
+  },
+  "measured_runs": 1,
+  "measured_start_run": 1,
+  "profile_config_path": "outputs_video/ltx2_sp_profile/fullgraph_fix/after_remove_disable_ltxdistattn_g4_sp4/profile_config.json",
+  "profile_log_path": "outputs_video/ltx2_sp_profile/fullgraph_fix/after_remove_disable_ltxdistattn_g4_sp4/profile.log",
+  "runs": [
+    {
+      "e2e_latency": 502.30168167175725,
+      "generation_time": 502.3009340548888,
+      "measured": true,
+      "output_path": "outputs_video/ltx2_sp_profile/fullgraph_fix/after_remove_disable_ltxdistattn_g4_sp4/videos/output_ltx2_basic_t2v_run_1.mp4",
+      "run_index": 1,
+      "sr_stage_entries": [],
+      "stage_times": {}
+    }
+  ]
+}

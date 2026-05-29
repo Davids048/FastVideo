@@ -141,7 +141,15 @@ The actual bottleneck is denoising, not MP4 writing and not RGB frame-list conve
 
 ## Fullgraph Decision
 
-`compile_fullgraph=False` is still required for sequence-parallel runs. The fullgraph attempt failed because TorchDynamo could not inline the `torch.compiler.disable()`-wrapped `LTXDistributedAttention.forward` path:
+Update from the later fullgraph-fix run: this section is now superseded for the tested LTX-2
+4-GPU SP path. The forced graph break was removed in `fastvideo/models/dits/ltx2.py` by deleting
+`@torch.compiler.disable` from `LTXDistributedAttention.forward`, and an explicit
+`--compile-fullgraph` smoke completed successfully. See
+`.agents/memory/experiment-journal/2026-05-29_ltx2_fullgraph_sequence_parallel_fix.md`.
+
+At the time of this 8x3 follow-up, `compile_fullgraph=False` was required for sequence-parallel
+runs. That fullgraph attempt failed because TorchDynamo could not inline the
+`torch.compiler.disable()`-wrapped `LTXDistributedAttention.forward` path:
 
 ```text
 torch._dynamo.exc.Unsupported: Skip inlining torch.compiler.disable()d function LTXDistributedAttention.forward

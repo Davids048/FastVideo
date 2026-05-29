@@ -3,6 +3,18 @@
 Living log of all experiments. Each entry captures what was tried, the result,
 and any insights. Newest entries go at the top.
 
+## [2026-05-29] Experiment: ltx2-distilled-sequence-parallel-fullgraph-fix
+
+- **Hypothesis**: LTX-2 sequence-parallel fullgraph compile fails only because the LTX-2-specific distributed attention forward is explicitly `torch.compiler.disable()` wrapped; removing that forced graph break should let `--compile-fullgraph` run.
+- **Config**: model=FastVideo/LTX2-Distilled-Diffusers, lr=N/A, sp_size=4, gpus=4, script=examples/inference/basic/basic_ltx2_distilled_fast_profile.py, schedule=8 base denoise steps + 3 refine steps, fp4_linear=false, nvfp4_fa4=false, torch_compile=true, compile_fullgraph=true
+- **W&B run**: N/A
+- **Duration**: One failing reproduction and one successful cold fullgraph smoke on Slurm job 4745, node `hpc-rack-2-8`, using `/home/hal-jundas/venvs/fv-shared`.
+- **Key metrics**: before patch failed with `torch._dynamo.exc.Unsupported: Skip inlining torch.compiler.disable()d function LTXDistributedAttention.forward`; after patch exited 0 with cold generation=502.300934055s and e2e=502.301681672s. This is compile/correctness evidence, not warmed latency.
+- **Checkpoint**: N/A
+- **Insight**: Fullgraph was previously disabled for SP because of a forced Dynamo graph break, not because of a measured performance preference. Removing `@torch.compiler.disable` from `fastvideo/models/dits/ltx2.py::LTXDistributedAttention.forward` lets the tested 4-GPU LTX-2 SP path run with `--compile-fullgraph`.
+- **Status**: completed
+- **Related lessons**: Detailed report and committed config/summary snapshots: `.agents/memory/experiment-journal/2026-05-29_ltx2_fullgraph_sequence_parallel_fix.md`, `.agents/memory/experiment-journal/artifacts/2026-05-29_ltx2_fullgraph_sp_fix/after_remove_disable_ltxdistattn_g4_sp4/profile_config.json`, `.agents/memory/experiment-journal/artifacts/2026-05-29_ltx2_fullgraph_sp_fix/after_remove_disable_ltxdistattn_g4_sp4/profile_summary.json`
+
 ## [2026-05-29] Experiment: ltx2-distilled-sequence-parallel-8x3-profile
 
 - **Hypothesis**: Moving LTX-2 distilled profiling to low-res 8 steps plus high-res/refine 3 steps will be slower than the prior 5+2 setup, but 4-GPU SP plus stack overhead reductions may recover generation latency to the requested <=4.2s target.
