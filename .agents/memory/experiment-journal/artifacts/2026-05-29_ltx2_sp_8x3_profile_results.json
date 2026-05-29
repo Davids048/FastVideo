@@ -148,5 +148,22 @@
     "GPU timing for the VideoGenerator latency-only materialization skip",
     "CUDA-node pytest for fastvideo/tests/entrypoints/test_video_generator.py"
   ],
+  "completed_validation": [
+    {
+      "name": "profile script config tests",
+      "command": "/home/hal-jundas/venvs/fv-shared/bin/python -m pytest tests/local_tests/ltx2/test_ltx2_profile_script_config.py -q",
+      "result": "5 passed"
+    },
+    {
+      "name": "VideoGenerator entrypoint tests with login-node fastvideo_kernel stubs",
+      "command": "/home/hal-jundas/venvs/fv-shared/bin/python -c \"<install in-memory fastvideo_kernel stubs>; pytest.main(['fastvideo/tests/entrypoints/test_video_generator.py', '-q'])\"",
+      "result": "23 passed",
+      "scope": "validates Python control flow and output-materialization tests without requiring a CUDA/Triton driver"
+    },
+    {
+      "name": "syntax and whitespace checks",
+      "result": "AST compile passed for edited Python files; git diff --check passed"
+    }
+  ],
   "slurm_issue": "srun on job 4745 failed because the job was expired/invalid or could not be confirmed; sbatch failed with Unable to contact slurm controller."
 }

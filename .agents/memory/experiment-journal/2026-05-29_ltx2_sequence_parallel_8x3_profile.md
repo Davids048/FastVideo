@@ -146,12 +146,20 @@ Local validation that does not require CUDA:
 /home/hal-jundas/venvs/fv-shared/bin/python -m pytest tests/local_tests/ltx2/test_ltx2_profile_script_config.py -q
 5 passed
 
+/home/hal-jundas/venvs/fv-shared/bin/python -c "<install in-memory fastvideo_kernel stubs>; pytest.main(['fastvideo/tests/entrypoints/test_video_generator.py', '-q'])"
+23 passed
+
 /home/hal-jundas/venvs/fv-shared/bin/python -c "compile(...)"
 AST compile passed for 4 files
 
 git diff --check
 passed
 ```
+
+The `fastvideo/tests/entrypoints/test_video_generator.py` login-node run used in-memory stubs for
+`fastvideo_kernel` and `fastvideo_kernel.triton_kernels.sla_triton` so collection did not ask Triton
+for an active CUDA driver. That validates the Python control flow and new output-materialization
+tests, but it is not a replacement for a real CUDA-node pytest run.
 
 Attempted validation that is currently blocked:
 
