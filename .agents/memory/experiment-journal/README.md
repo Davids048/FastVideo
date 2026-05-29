@@ -9,11 +9,11 @@ and any insights. Newest entries go at the top.
 - **Config**: model=FastVideo/LTX2-Distilled-Diffusers, lr=N/A, sp_size=1/2/4 baselines and 4 optimized, gpus=1/2/4, script=examples/inference/basic/basic_ltx2_distilled_fast_profile.py
 - **W&B run**: N/A
 - **Duration**: Baselines and completed trials used 12 runs with 2 warmups except the no-VAE trial, which used 5 runs with 2 warmups. CUDA-node tests and the final 4-GPU profile used escalated Slurm overlap commands on job 4745 because sandboxed commands could not reach the node allocation.
-- **Key metrics**: 1gpu baseline gen=6.534s e2e=6.634s sr=4.112s; 2gpu baseline gen=5.541s e2e=5.637s sr=2.641s; 4gpu baseline gen=4.335s e2e=4.433s sr=1.496s; best VAE-decode-included optimized 4gpu gen=4.207s e2e=4.207s; best latency-only decode-skip 4gpu gen=4.117s e2e=4.117s
+- **Key metrics**: 1gpu baseline gen=6.534s e2e=6.634s sr=4.112s; 2gpu baseline gen=5.541s e2e=5.637s sr=2.641s; 4gpu baseline gen=4.335s e2e=4.433s sr=1.496s; rejected latency-only decode-skip 4gpu gen=4.117s e2e=4.117s; corrected real-output return-frames 4gpu gen=4.337s e2e=4.437s
 - **Checkpoint**: N/A
-- **Insight**: The <=4.2s target is achieved for the no-save/no-return latency-only contract by skipping discarded VAE pixel decode in `DecodingStage`; visible output paths still decode pixels. If a future target requires saved videos or returned frames, use the VAE-decode-included 4.207s near-miss as the honest starting point. `reduce-overhead` compile mode failed with a CUDA graph overwritten-tensor error, disabling VAE compile regressed generation to 5.521s, and a temporary TQDM-disable patch regressed to 4.411s and was reverted.
-- **Status**: completed
-- **Related lessons**: Detailed report and result snapshot: `.agents/memory/experiment-journal/2026-05-29_ltx2_sequence_parallel_8x3_profile.md`, `.agents/memory/experiment-journal/artifacts/2026-05-29_ltx2_sp_8x3_profile_results.json`
+- **Insight**: Review rejected the target-achieved interpretation because skipping VAE pixel decode does not preserve the real video-frame-producing workload. The corrected run uses `--no-save-video --return-frames`, keeps decoded frames, and misses the <=4.2s generation target by 0.137s. Torch-profiler attribution shows the bottleneck order is base denoising, refine denoising, then VAE decode; `PostDecodeFrameProcessStage` explains e2e overhead but is after recorded generation time.
+- **Status**: corrected; target not achieved for real decoded frames
+- **Related lessons**: Detailed report, review decision, follow-up, and result snapshot: `.agents/memory/experiment-journal/2026-05-29_ltx2_sequence_parallel_8x3_profile.md`, `.agents/memory/experiment-journal/2026-05-29_ltx2_8x3_profile_review_decision.md`, `.agents/memory/experiment-journal/2026-05-29_ltx2_8x3_profile_review_followup.md`, `.agents/memory/experiment-journal/artifacts/2026-05-29_ltx2_sp_8x3_profile_results.json`
 
 ## [2026-05-29] Experiment: ltx2-distilled-sequence-parallel-profile
 

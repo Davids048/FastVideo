@@ -2,7 +2,7 @@
 
 Date: 2026-05-29
 
-Status: completed. The requested 8 base / 3 refine defaults, 1/2/4 GPU baselines, focused tests, optimization, and memory update were completed. The <=4.2s target was achieved on 4 GPUs for the latency-only no-save/no-return contract.
+Status: superseded by review follow-up for the real frame-producing workload. The earlier `4.117228775s` target-achieving conclusion below is valid only for a latent/timing-only shortcut that skipped main VAE pixel decode. The corrected `--no-save-video --return-frames` real-output result is `4.337300085s` average generation and `4.437282278s` average end-to-end latency on 4 GPUs, so the `<=4.2s` target was not achieved for real decoded frames. See `.agents/memory/experiment-journal/2026-05-29_ltx2_8x3_profile_review_decision.md` and `.agents/memory/experiment-journal/2026-05-29_ltx2_8x3_profile_review_followup.md`.
 
 ## Goal
 
@@ -118,6 +118,8 @@ Each directory has `profile_config.json`, `profile_summary.json`, and `profile.l
 
 ## Optimization Results
 
+Correction after review: the rows in this section were produced before the real output contract was clarified. `optimized_latency_only_decode_skip_no_stage_logging_no_fp4_g4_compile_sp4_8x3_no_save` is invalid for real video-frame generation because it skipped main VAE pixel decode. The corrected return-frames follow-up did not achieve the target; its best 4-GPU result was `4.337300085s` average generation.
+
 Each completed optimization result used 12 runs and skipped the first 2 warmups unless noted.
 
 | Run | Change | Avg generation | Avg e2e | Result |
@@ -126,12 +128,12 @@ Each completed optimization result used 12 runs and skipped the first 2 warmups 
 | `optimized_materialization_skip_no_stage_logging_no_fp4_g4_compile_sp4_8x3_no_save` | skipped CPU sample materialization and RGB frame build for no-save/no-return | 4.207s | 4.207s | near miss, 0.0065s above target; still includes VAE pixel decode |
 | `optimized_materialization_skip_no_stage_logging_no_fp4_g4_compile_sp4_8x3_no_save_repeat2` | repeated materialization-skip run | 4.298s | 4.299s | regressed versus first run |
 | `optimized_materialization_skip_tqdm_disabled_no_stage_logging_no_fp4_g4_compile_sp4_8x3_no_save` | temporary TQDM-disable patch plus `TQDM_DISABLE=1` | 4.411s | 4.411s | regressed; patch reverted |
-| `optimized_latency_only_decode_skip_no_stage_logging_no_fp4_g4_compile_sp4_8x3_no_save` | skipped VAE pixel decode for no-save/no-return latency-only calls | 4.117s | 4.117s | target achieved on 4 GPUs |
+| `optimized_latency_only_decode_skip_no_stage_logging_no_fp4_g4_compile_sp4_8x3_no_save` | skipped VAE pixel decode for no-save/no-return latency-only calls | 4.117s | 4.117s | invalid for real frame-producing workload |
 | `optimized_quiet_no_stage_logging_no_fp4_g4_compile_sp4_8x3_no_save` | added `FASTVIDEO_LOGGING_LEVEL=WARNING` and `TQDM_DISABLE=1` before the TQDM patch | 4.346s | 4.457s | regressed |
 | `trial_no_vae_compile_no_stage_logging_no_fp4_g4_compile_sp4_8x3_no_save` | disabled VAE compile, 5 runs with 2 warmups | 5.521s | 5.616s | regressed heavily |
 | `trial_reduce_overhead_no_stage_logging_no_fp4_g4_compile_sp4_8x3_no_save` | `--compile-mode reduce-overhead` | N/A | N/A | failed before measurements |
 
-The exact target-achieving summary is:
+The exact rejected latency-only summary is:
 
 ```text
 run=optimized_latency_only_decode_skip_no_stage_logging_no_fp4_g4_compile_sp4_8x3_no_save
@@ -140,6 +142,18 @@ measured_start_run=3
 avg_video_generation_time=4.117228775378317
 avg_e2e_latency=4.117467191582546
 output_dir=outputs_video/ltx2_sp_profile/steps8x3_optimized/optimized_latency_only_decode_skip_no_stage_logging_no_fp4_g4_compile_sp4_8x3_no_save/
+```
+
+The corrected real-output summary is:
+
+```text
+run=optimized_profiler_gated_return_frames_no_fp4_g4_compile_sp4_8x3_no_save
+measured_runs=10
+measured_start_run=3
+avg_video_generation_time=4.3373000848572705
+avg_e2e_latency=4.437282278155908
+output_dir=outputs_video/ltx2_sp_profile/steps8x3_real_output/optimized_profiler_gated_return_frames_no_fp4_g4_compile_sp4_8x3_no_save/
+target_status=not achieved for decoded return-frames workload
 ```
 
 The `reduce-overhead` trial failed during the first run with a TorchDynamo CUDA graph error:

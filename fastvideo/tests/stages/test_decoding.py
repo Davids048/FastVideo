@@ -28,16 +28,34 @@ def _batch(save_video=False, return_frames=False, return_trajectory_decoded=Fals
     )
 
 
-def test_decoding_stage_skips_pixel_decode_for_latency_only_calls():
+def test_decoding_stage_decodes_pixel_frames_even_without_save_or_return_flags():
+    batch = _batch(save_video=False, return_frames=False)
+    stage = DecodingStage(vae=object())
+    calls = []
+
+    def fake_decode(latents, fastvideo_args):
+        calls.append(latents)
+        return torch.ones((1, 3, 3, 8, 8), dtype=torch.bfloat16)
+
+    stage.decode = fake_decode
+
+    result = stage.forward(batch, _fastvideo_args())
+
+    assert calls == [batch.latents]
+    assert result.output.shape == (1, 3, 3, 8, 8)
+    assert result.output.dtype == torch.float32
+
+
+def test_decoding_stage_keeps_latent_output_without_pixel_decode():
     batch = _batch(save_video=False, return_frames=False)
     stage = DecodingStage(vae=object())
 
     def fail_decode(*args, **kwargs):
-        raise AssertionError("latency-only calls should not decode discarded pixel frames")
+        raise AssertionError("latent output should not decode pixels")
 
     stage.decode = fail_decode
 
-    result = stage.forward(batch, _fastvideo_args())
+    result = stage.forward(batch, _fastvideo_args(output_type="latent"))
 
     assert result.output is batch.latents
 

@@ -1,7 +1,7 @@
 {
   "date": "2026-05-29",
   "experiment": "ltx2-distilled-sequence-parallel-8x3-profile",
-  "status": "completed",
+  "status": "superseded_by_review_followup",
   "target": {
     "metric": "average video_generation_time",
     "threshold_seconds": 4.2,
@@ -10,8 +10,30 @@
       4
     ],
     "saving_video_in_scope": false,
-    "achieved": true,
-    "achieved_by": "optimized_latency_only_decode_skip_no_stage_logging_no_fp4_g4_compile_sp4_8x3_no_save"
+    "achieved": false,
+    "achieved_by": null,
+    "invalidated_achieved_by": "optimized_latency_only_decode_skip_no_stage_logging_no_fp4_g4_compile_sp4_8x3_no_save",
+    "invalidated_reason": "The prior target-achieving run skipped main VAE pixel decode and is not valid for a real frame-producing workload.",
+    "corrected_best_real_output_run": "optimized_profiler_gated_return_frames_no_fp4_g4_compile_sp4_8x3_no_save",
+    "corrected_best_real_output_generation_seconds": 4.3373000848572705,
+    "corrected_best_real_output_e2e_seconds": 4.437282278155908,
+    "corrected_misses_target_by_seconds": 0.13730008485727035
+  },
+  "review_followup": {
+    "decision_path": ".agents/memory/experiment-journal/2026-05-29_ltx2_8x3_profile_review_decision.md",
+    "followup_path": ".agents/memory/experiment-journal/2026-05-29_ltx2_8x3_profile_review_followup.md",
+    "corrected_output_contract": {
+      "save_video": false,
+      "return_frames": true,
+      "decoded_frames_required": true
+    },
+    "corrected_results_dir": "outputs_video/ltx2_sp_profile/steps8x3_real_output/optimized_profiler_gated_return_frames_no_fp4_g4_compile_sp4_8x3_no_save",
+    "torch_profiler_trace_dir": "/tmp/hal-jundas/ltx2_torch_profiler/real_output_g4_return_frames_steady_run3",
+    "bottleneck_order": [
+      "denoising_stage",
+      "ltx2_refine_denoising_stage",
+      "decoding_stage"
+    ]
   },
   "shared_config": {
     "script": "examples/inference/basic/basic_ltx2_distilled_fast_profile.py",
@@ -180,7 +202,9 @@
       "stage_times_seconds": {},
       "latency_only_contract": true,
       "skips_vae_pixel_decode": true,
-      "achieves_target": true,
+      "achieves_target": false,
+      "invalid_for_real_output": true,
+      "invalid_reason": "skips main VAE pixel decode; use only as latent/timing-only negative control",
       "output_dir": "outputs_video/ltx2_sp_profile/steps8x3_optimized/optimized_latency_only_decode_skip_no_stage_logging_no_fp4_g4_compile_sp4_8x3_no_save"
     },
     {
@@ -195,6 +219,24 @@
       "avg_sr_seconds": null,
       "stage_times_seconds": {},
       "output_dir": "outputs_video/ltx2_sp_profile/steps8x3_optimized/optimized_quiet_no_stage_logging_no_fp4_g4_compile_sp4_8x3_no_save"
+    },
+    {
+      "name": "optimized_profiler_gated_return_frames_no_fp4_g4_compile_sp4_8x3_no_save",
+      "kind": "review_followup_corrected_real_output",
+      "gpus": 4,
+      "sp_size": 4,
+      "measured_runs": 10,
+      "warmup_runs": 2,
+      "avg_generation_seconds": 4.3373000848572705,
+      "avg_e2e_seconds": 4.437282278155908,
+      "avg_sr_seconds": null,
+      "stage_times_seconds": {},
+      "save_video": false,
+      "return_frames": true,
+      "decoded_frames_required": true,
+      "achieves_target": false,
+      "misses_target_by_seconds": 0.13730008485727035,
+      "output_dir": "outputs_video/ltx2_sp_profile/steps8x3_real_output/optimized_profiler_gated_return_frames_no_fp4_g4_compile_sp4_8x3_no_save"
     },
     {
       "name": "trial_no_vae_compile_no_stage_logging_no_fp4_g4_compile_sp4_8x3_no_save",
@@ -224,10 +266,10 @@
     }
   ],
   "best_measured": {
-    "name": "optimized_latency_only_decode_skip_no_stage_logging_no_fp4_g4_compile_sp4_8x3_no_save",
-    "avg_generation_seconds": 4.117228775378317,
-    "beats_target_by_seconds": 0.08277122462168312,
-    "contract": "latency-only no-save/no-return"
+    "name": "optimized_profiler_gated_return_frames_no_fp4_g4_compile_sp4_8x3_no_save",
+    "avg_generation_seconds": 4.3373000848572705,
+    "misses_target_by_seconds": 0.13730008485727035,
+    "contract": "real-output no-save/return-frames"
   },
   "best_vae_decode_included_measured": {
     "name": "optimized_materialization_skip_no_stage_logging_no_fp4_g4_compile_sp4_8x3_no_save",
