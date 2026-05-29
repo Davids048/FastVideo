@@ -1,0 +1,166 @@
+{
+  "date": "2026-05-29",
+  "experiment": "ltx2-distilled-block47-gpu-profile",
+  "status": "completed",
+  "python": "/home/hal-jundas/venvs/fv-shared/bin/python",
+  "output_root": "outputs_video/ltx2_sp_profile/block47_gpu_profile",
+  "nsys_run_root": "outputs_video/ltx2_sp_profile/block47_gpu_profile_nsys_runs",
+  "shared_config": {
+    "model_id": "FastVideo/LTX2-Distilled-Diffusers",
+    "validation_json": "examples/training/finetune/ltx2/validation.json",
+    "num_frames": 121,
+    "num_inference_steps": 8,
+    "refine_num_inference_steps": 3,
+    "num_runs": 4,
+    "warmup_runs": 2,
+    "avg_window": 2,
+    "fp4_linear": false,
+    "nvfp4_fa4": false,
+    "torch_compile": true,
+    "compile_text_encoder": true,
+    "compile_vae": true,
+    "stage_logging": false,
+    "save_video": false,
+    "return_frames": false,
+    "tp_size": 1
+  },
+  "cases": {
+    "g1_sp1_base_block47": {
+      "gpus": 1,
+      "sp_size": 1,
+      "stage": "base",
+      "measured_runs": 2,
+      "avg_generation_s": 7.732579491334036,
+      "avg_e2e_s": 7.732776451390237,
+      "torch_trace_files": 1,
+      "torch_events_per_rank": [16],
+      "block_rank_mean_ms": [4.384],
+      "block_rank_max_mean_ms": 4.384,
+      "block_rank_max_p50_ms": 4.378,
+      "block_rank_max_min_ms": 4.234,
+      "block_rank_max_max_ms": 4.589,
+      "nsys_kernel_total_ms": 4.162,
+      "nsys_kernel_category_pct": {
+        "nccl": 0.0,
+        "flash_attention": 29.4,
+        "nvjet_gemm": 55.8,
+        "triton": 14.8
+      }
+    },
+    "g2_sp2_base_block47": {
+      "gpus": 2,
+      "sp_size": 2,
+      "stage": "base",
+      "measured_runs": 2,
+      "avg_generation_s": 7.781213711248711,
+      "avg_e2e_s": 7.781400191131979,
+      "torch_trace_files": 2,
+      "torch_events_per_rank": [16, 16],
+      "block_rank_mean_ms": [6.921, 6.83],
+      "block_rank_max_mean_ms": 6.999,
+      "block_rank_max_p50_ms": 6.916,
+      "block_rank_max_min_ms": 6.843,
+      "block_rank_max_max_ms": 7.622,
+      "nsys_kernel_total_ms": 5.519,
+      "nsys_kernel_category_pct": {
+        "nccl": 47.5,
+        "flash_attention": 12.2,
+        "nvjet_gemm": 28.3,
+        "triton": 12.0
+      }
+    },
+    "g4_sp4_base_block47": {
+      "gpus": 4,
+      "sp_size": 4,
+      "stage": "base",
+      "measured_runs": 2,
+      "avg_generation_s": 6.854927492327988,
+      "avg_e2e_s": 6.855182933388278,
+      "torch_trace_files": 4,
+      "torch_events_per_rank": [16, 16, 16, 16],
+      "block_rank_mean_ms": [7.07, 7.319, 7.176, 7.624],
+      "block_rank_max_mean_ms": 7.747,
+      "block_rank_max_p50_ms": 7.584,
+      "block_rank_max_min_ms": 7.259,
+      "block_rank_max_max_ms": 8.672,
+      "nsys_kernel_total_ms": 6.132,
+      "nsys_kernel_category_pct": {
+        "nccl": 70.0,
+        "flash_attention": 6.2,
+        "nvjet_gemm": 17.1,
+        "triton": 6.7
+      }
+    },
+    "g1_sp1_refine_block47": {
+      "gpus": 1,
+      "sp_size": 1,
+      "stage": "refine",
+      "measured_runs": 2,
+      "avg_generation_s": 7.833214985905215,
+      "avg_e2e_s": 7.833391786552966,
+      "torch_trace_files": 1,
+      "torch_events_per_rank": [6],
+      "block_rank_mean_ms": [27.992],
+      "block_rank_max_mean_ms": 27.992,
+      "block_rank_max_p50_ms": 28.232,
+      "block_rank_max_min_ms": 26.948,
+      "block_rank_max_max_ms": 28.797,
+      "nsys_kernel_total_ms": 30.494,
+      "nsys_kernel_category_pct": {
+        "nccl": 0.0,
+        "flash_attention": 47.3,
+        "nvjet_gemm": 42.2,
+        "triton": 10.5
+      }
+    },
+    "g2_sp2_refine_block47": {
+      "gpus": 2,
+      "sp_size": 2,
+      "stage": "refine",
+      "measured_runs": 2,
+      "avg_generation_s": 7.7344172624871135,
+      "avg_e2e_s": 7.73474135925062,
+      "torch_trace_files": 2,
+      "torch_events_per_rank": [6, 6],
+      "block_rank_mean_ms": [16.929, 16.906],
+      "block_rank_max_mean_ms": 16.961,
+      "block_rank_max_p50_ms": 16.888,
+      "block_rank_max_min_ms": 16.671,
+      "block_rank_max_max_ms": 17.571,
+      "nsys_kernel_total_ms": 17.382,
+      "nsys_kernel_category_pct": {
+        "nccl": 16.5,
+        "flash_attention": 36.1,
+        "nvjet_gemm": 32.6,
+        "triton": 14.8
+      }
+    },
+    "g4_sp4_refine_block47": {
+      "gpus": 4,
+      "sp_size": 4,
+      "stage": "refine",
+      "measured_runs": 2,
+      "avg_generation_s": 6.649028207641095,
+      "avg_e2e_s": 6.649353167973459,
+      "torch_trace_files": 4,
+      "torch_events_per_rank": [6, 6, 6, 6],
+      "block_rank_mean_ms": [7.607, 7.883, 9.59, 7.47],
+      "block_rank_max_mean_ms": 9.59,
+      "block_rank_max_p50_ms": 9.635,
+      "block_rank_max_min_ms": 9.274,
+      "block_rank_max_max_ms": 10.032,
+      "nsys_kernel_total_ms": 9.054,
+      "nsys_kernel_category_pct": {
+        "nccl": 12.0,
+        "flash_attention": 35.5,
+        "nvjet_gemm": 37.3,
+        "triton": 15.1
+      }
+    }
+  },
+  "interpretation": {
+    "base": "Block 47 got slower with SP, and Nsight shows NCCL rising from 0.0% on 1 GPU to 47.5% on 2 GPUs and 70.0% on 4 GPUs.",
+    "refine": "Block 47 got faster with SP, falling from 27.992 ms on 1 GPU to 9.590 ms on 4 GPUs, while NCCL stayed a minority of filtered kernel time.",
+    "videos": "No MP4 files were written because every run used --no-save-video --no-return-frames."
+  }
+}

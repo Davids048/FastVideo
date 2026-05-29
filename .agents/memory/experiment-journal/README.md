@@ -3,6 +3,18 @@
 Living log of all experiments. Each entry captures what was tried, the result,
 and any insights. Newest entries go at the top.
 
+## [2026-05-29] Experiment: ltx2-distilled-block47-gpu-profile
+
+- **Hypothesis**: A late transformer block will show whether the prior 8+3 stage split comes from SP communication overhead in low-res base denoising versus useful compute partitioning in high-res refine denoising.
+- **Config**: model=FastVideo/LTX2-Distilled-Diffusers, lr=N/A, sp_size=1/2/4, gpus=1/2/4, script=examples/inference/basic/basic_ltx2_distilled_fast_profile.py, schedule=8 base steps + 3 refine steps, block=transformer_blocks.47, fp4_linear=false, nvfp4_fa4=false, torch_compile=true, compile_text_encoder=true, compile_vae=true, save_video=false, return_frames=false, stage_logging=false
+- **W&B run**: N/A
+- **Duration**: Six Torch-profiler runs plus six Nsight-only runs on Slurm overlap steps using holder job 4745 and temporary allocation 4774; allocation 4774 was released after completion.
+- **Key metrics**: block47 base rank-max mean=4.384ms on 1 GPU, 6.999ms on 2 GPUs, 7.747ms on 4 GPUs; Nsight base NCCL share=0.0%, 47.5%, 70.0%. block47 refine rank-max mean=27.992ms on 1 GPU, 16.961ms on 2 GPUs, 9.590ms on 4 GPUs; Nsight refine NCCL share=0.0%, 16.5%, 12.0%.
+- **Checkpoint**: N/A
+- **Insight**: The base-stage SP slowdown is communication dominated at block 47, while the refine-stage workload is large enough that SP compute reduction wins despite NCCL. No MP4 outputs were written because the run used `--no-save-video --no-return-frames`; all durable artifacts are configs, summaries, Torch traces, and Nsight reports under `outputs_video/ltx2_sp_profile/block47_gpu_profile/`.
+- **Status**: completed
+- **Related lessons**: Detailed report and compact metrics: `.agents/memory/experiment-journal/2026-05-29_ltx2_block47_gpu_profile.md`, `.agents/memory/experiment-journal/artifacts/2026-05-29_ltx2_block47_gpu_profile_summary.json`
+
 ## [2026-05-29] Experiment: ltx2-distilled-sequence-parallel-fullgraph-fix
 
 - **Hypothesis**: LTX-2 sequence-parallel fullgraph compile fails only because the LTX-2-specific distributed attention forward is explicitly `torch.compiler.disable()` wrapped; removing that forced graph break should let `--compile-fullgraph` run.

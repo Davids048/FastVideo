@@ -3,6 +3,7 @@
 LTX-2 transformer implementation
 """
 
+import contextlib
 from dataclasses import dataclass, replace
 from enum import Enum
 import functools
@@ -35,6 +36,74 @@ from fastvideo.models.dits.base import BaseDiT
 from fastvideo.platforms import AttentionBackendEnum
 
 logger = init_logger(__name__)
+
+_LTX2_BLOCK_PROFILE_OCCURRENCES: dict[tuple[int, str], int] = {}
+
+
+def _get_int_env(name: str, default: int) -> int:
+    value = os.getenv(name)
+    if value is None:
+        return default
+    try:
+        return int(value)
+    except ValueError:
+        return default
+
+
+@contextlib.contextmanager
+def _ltx2_block_profile_range(name: str):
+    with torch.profiler.record_function(name):
+        if torch.cuda.is_available():
+            torch.cuda.nvtx.range_push(name)
+            try:
+                yield
+            finally:
+                torch.cuda.nvtx.range_pop()
+        else:
+            yield
+
+
+def _ltx2_block_profile_target() -> tuple[int, str] | None:
+    index_text = os.getenv("FASTVIDEO_LTX2_BLOCK_PROFILE_INDEX")
+    stage = os.getenv("FASTVIDEO_LTX2_BLOCK_PROFILE_STAGE")
+    if index_text is None or stage not in {"base", "refine"}:
+        return None
+    try:
+        index = int(index_text)
+    except ValueError:
+        return None
+    try:
+        forward_batch = get_forward_context().forward_batch
+    except AssertionError:
+        return None
+    current_stage = None if forward_batch is None else forward_batch.extra.get("ltx2_fp4_stage_profile")
+    if current_stage != stage:
+        return None
+    return index, stage
+
+
+def _ltx2_block_profile_state(index: int, stage: str) -> tuple[str, str | None, bool, bool] | None:
+    key = (index, stage)
+    occurrence = _LTX2_BLOCK_PROFILE_OCCURRENCES.get(key, 0)
+    _LTX2_BLOCK_PROFILE_OCCURRENCES[key] = occurrence + 1
+
+    skip_occurrences = _get_int_env("FASTVIDEO_LTX2_BLOCK_PROFILE_SKIP_OCCURRENCES", 0)
+    active_occurrences = _get_int_env("FASTVIDEO_LTX2_BLOCK_PROFILE_ACTIVE_OCCURRENCES", -1)
+    if occurrence < skip_occurrences:
+        return None
+    active_offset = occurrence - skip_occurrences
+    if active_occurrences >= 0 and active_offset >= active_occurrences:
+        return None
+
+    range_name = f"fastvideo.ltx2.block{index}.{stage}"
+    capture_name = None
+    open_capture = False
+    close_capture = False
+    if os.getenv("FASTVIDEO_LTX2_BLOCK_PROFILE_CAPTURE_RANGE", "0") != "0" and active_occurrences > 0:
+        capture_name = f"{range_name}.capture"
+        open_capture = active_offset == 0
+        close_capture = active_offset == active_occurrences - 1
+    return range_name, capture_name, open_capture, close_capture
 
 
 def _supports_prequantized_input(linear: ReplicatedLinear) -> bool:
@@ -2307,19 +2376,43 @@ class LTXModel(torch.nn.Module):
         # Convert once so per-block membership checks stay O(1).
         skip_video_self_attn_block_set = set(skip_video_self_attn_blocks or [])
         skip_audio_self_attn_block_set = set(skip_audio_self_attn_blocks or [])
+        block_profile_target = _ltx2_block_profile_target()
 
         for idx, block in enumerate(self.transformer_blocks):
             skip_v_sa = idx in skip_video_self_attn_block_set
             skip_a_sa = idx in skip_audio_self_attn_block_set
-            video, audio = block(
-                video=video,
-                audio=audio,
-                video_original_seq_len=video_original_seq_len,
-                audio_original_seq_len=audio_original_seq_len,
-                skip_cross_modal_attn=skip_cross_modal_attn,
-                skip_video_self_attn=skip_v_sa,
-                skip_audio_self_attn=skip_a_sa,
+            block_profile_state = (
+                _ltx2_block_profile_state(idx, block_profile_target[1])
+                if block_profile_target is not None and idx == block_profile_target[0] else None
             )
+            if block_profile_state is None:
+                video, audio = block(
+                    video=video,
+                    audio=audio,
+                    video_original_seq_len=video_original_seq_len,
+                    audio_original_seq_len=audio_original_seq_len,
+                    skip_cross_modal_attn=skip_cross_modal_attn,
+                    skip_video_self_attn=skip_v_sa,
+                    skip_audio_self_attn=skip_a_sa,
+                )
+            else:
+                range_name, capture_name, open_capture, close_capture = block_profile_state
+                if open_capture and capture_name is not None and torch.cuda.is_available():
+                    torch.cuda.nvtx.range_push(capture_name)
+                try:
+                    with _ltx2_block_profile_range(range_name):
+                        video, audio = block(
+                            video=video,
+                            audio=audio,
+                            video_original_seq_len=video_original_seq_len,
+                            audio_original_seq_len=audio_original_seq_len,
+                            skip_cross_modal_attn=skip_cross_modal_attn,
+                            skip_video_self_attn=skip_v_sa,
+                            skip_audio_self_attn=skip_a_sa,
+                        )
+                finally:
+                    if close_capture and capture_name is not None and torch.cuda.is_available():
+                        torch.cuda.nvtx.range_pop()
         return video, audio
 
     def _process_output(
@@ -2421,6 +2514,7 @@ class LTX2Transformer3DModel(BaseDiT):
     reverse_param_names_mapping = LTX2VideoConfig().reverse_param_names_mapping
     lora_param_names_mapping = LTX2VideoConfig().lora_param_names_mapping
     _fsdp_shard_conditions = LTX2VideoConfig()._fsdp_shard_conditions
+    _compile_conditions = LTX2VideoConfig()._compile_conditions
 
     def __init__(self, config: LTX2VideoConfig, hf_config: dict[str, Any]):
         super().__init__(config=config, hf_config=hf_config)
