@@ -1,0 +1,372 @@
+{
+  "args": {
+    "attention_backend": "FLASH_ATTN",
+    "avg_window": null,
+    "compile_backend": "inductor",
+    "compile_dynamic": false,
+    "compile_fullgraph": false,
+    "compile_mode": null,
+    "compile_text_encoder": true,
+    "compile_vae": true,
+    "distributed_executor_backend": "mp",
+    "fp4_linear": true,
+    "fps": 24,
+    "guidance_scale": 1.0,
+    "height": null,
+    "ltx2_vae_tiling": false,
+    "model_id": "FastVideo/LTX2-Distilled-Diffusers",
+    "num_frames": 121,
+    "num_gpus": 4,
+    "num_inference_steps": 5,
+    "num_runs": 12,
+    "nvfp4_fa4": false,
+    "profile_dir": "outputs_video/ltx2_sp_profile/full",
+    "refine_add_noise": true,
+    "refine_guidance_scale": 1.0,
+    "refine_num_inference_steps": 2,
+    "return_frames": false,
+    "run_name": "fp4_linear_g4_compile_sp_fullgraph_false",
+    "save_video": true,
+    "seed": 10,
+    "sp_size": 4,
+    "torch_compile": true,
+    "tp_size": 1,
+    "validation_json": "/home/hal-jundas/codes/FastVideo-ltx2-sp-profile/examples/training/finetune/ltx2/validation.json",
+    "warmup_runs": 2,
+    "width": null
+  },
+  "pipeline_config": {
+    "audio_decoder_config": {
+      "arch_config": {
+        "architectures": [
+          "LTX2AudioDecoder"
+        ],
+        "stacked_params_mapping": []
+      }
+    },
+    "audio_decoder_precision": "bf16",
+    "boundary_ratio": null,
+    "disable_autocast": false,
+    "dit_config": {
+      "arch_config": {
+        "_compile_conditions": [
+          "<function is_ltx2_blocks at 0xebaff5ee0180>"
+        ],
+        "_fsdp_shard_conditions": [
+          "<function is_ltx2_blocks at 0xebaff5ee0180>"
+        ],
+        "_supported_attention_backends": [
+          "<AttentionBackendEnum.SAGE_ATTN: 3>",
+          "<AttentionBackendEnum.FLASH_ATTN: 1>",
+          "<AttentionBackendEnum.TORCH_SDPA: 2>",
+          "<AttentionBackendEnum.VIDEO_SPARSE_ATTN: 5>",
+          "<AttentionBackendEnum.VMOBA_ATTN: 7>",
+          "<AttentionBackendEnum.SAGE_ATTN_THREE: 4>",
+          "<AttentionBackendEnum.SLA_ATTN: 8>",
+          "<AttentionBackendEnum.SAGE_SLA_ATTN: 9>"
+        ],
+        "attention_head_dim": 128,
+        "attention_type": "default",
+        "audio_attention_head_dim": 64,
+        "audio_cross_attention_dim": 2048,
+        "audio_in_channels": 128,
+        "audio_num_attention_heads": 32,
+        "audio_out_channels": 128,
+        "audio_positional_embedding_max_pos": [
+          20
+        ],
+        "av_ca_timestep_scale_multiplier": 1,
+        "boundary_ratio": null,
+        "caption_channels": 3840,
+        "cross_attention_dim": 4096,
+        "double_precision_rope": true,
+        "exclude_lora_layers": [],
+        "hidden_size": 0,
+        "in_channels": 128,
+        "lora_param_names_mapping": {},
+        "norm_eps": 1e-06,
+        "num_attention_heads": 32,
+        "num_channels_latents": 128,
+        "num_layers": 48,
+        "out_channels": 128,
+        "param_names_mapping": {
+          "^(.*)$": "model.\\1",
+          "^diffusion_model\\.(.*)$": "model.\\1",
+          "^model\\.(.*)$": "model.\\1",
+          "^model\\.diffusion_model\\.(.*)$": "model.\\1"
+        },
+        "patch_size": [
+          1,
+          1,
+          1
+        ],
+        "positional_embedding_max_pos": [
+          20,
+          2048,
+          2048
+        ],
+        "positional_embedding_theta": 10000.0,
+        "reverse_param_names_mapping": {},
+        "rope_type": "split",
+        "stacked_params_mapping": [],
+        "timestep_scale_multiplier": 1000,
+        "use_middle_indices_grid": true
+      },
+      "prefix": "ltx2",
+      "quant_config": {
+        "class": "fastvideo.layers.quantization.nvfp4_config.NVFP4Config",
+        "name": "nvfp4",
+        "repr": "<fastvideo.layers.quantization.nvfp4_config.NVFP4Config object at 0xebafea71de80>"
+      }
+    },
+    "dit_precision": "bf16",
+    "dmd_denoising_steps": null,
+    "embedded_cfg_scale": 6.0,
+    "flow_shift": null,
+    "flow_shift_sr": null,
+    "image_encoder_config": {
+      "arch_config": {
+        "_supported_attention_backends": [
+          "<AttentionBackendEnum.FLASH_ATTN: 1>",
+          "<AttentionBackendEnum.TORCH_SDPA: 2>"
+        ],
+        "architectures": [],
+        "output_hidden_states": false,
+        "stacked_params_mapping": [],
+        "use_return_dict": true
+      },
+      "lora_config": null,
+      "prefix": "",
+      "quant_config": null
+    },
+    "image_encoder_precision": "fp32",
+    "is_causal": false,
+    "model_path": "/home/hal-jundas/.local/share/huggingface/hub/models--FastVideo--LTX2-Distilled-Diffusers/snapshots/0762ece944ea65f45cd3318981423e1670ff7225",
+    "pipeline_config_path": null,
+    "postprocess_text_funcs": [
+      "<function ltx2_postprocess_text at 0xebafea2f2340>"
+    ],
+    "preprocess_text_funcs": [
+      "<function preprocess_text at 0xebb42539f1a0>"
+    ],
+    "text_encoder_configs": [
+      {
+        "arch_config": {
+          "_fsdp_shard_conditions": [
+            "<function _is_feature_extractor_linear at 0xebaff5f253a0>",
+            "<function _is_embeddings at 0xebaff5f25440>",
+            "<function _is_gemma_model at 0xebaff5f254e0>"
+          ],
+          "_supported_attention_backends": [
+            "<AttentionBackendEnum.FLASH_ATTN: 1>",
+            "<AttentionBackendEnum.TORCH_SDPA: 2>"
+          ],
+          "architectures": [
+            "LTX2GemmaTextEncoderModel"
+          ],
+          "connector_attention_head_dim": 128,
+          "connector_double_precision_rope": false,
+          "connector_num_attention_heads": 30,
+          "connector_num_layers": 2,
+          "connector_num_learnable_registers": 128,
+          "connector_positional_embedding_max_pos": [
+            4096
+          ],
+          "connector_positional_embedding_theta": 10000.0,
+          "connector_rope_type": "split",
+          "decoder_start_token_id": 0,
+          "eos_token_id": 2,
+          "feature_extractor_in_features": 188160,
+          "feature_extractor_out_features": 3840,
+          "gemma_dtype": "bfloat16",
+          "gemma_model_path": "",
+          "hidden_size": 3840,
+          "hidden_state_skip_layer": 0,
+          "num_attention_heads": 30,
+          "num_hidden_layers": 48,
+          "output_hidden_states": true,
+          "output_past": true,
+          "pad_token_id": 0,
+          "padding_side": "left",
+          "scalable_attention": true,
+          "stacked_params_mapping": [],
+          "text_len": 1024,
+          "tie_word_embeddings": false,
+          "tokenizer_kwargs": {
+            "max_length": 1024,
+            "padding": "max_length",
+            "return_tensors": "pt",
+            "truncation": true
+          },
+          "use_return_dict": true,
+          "vocab_size": 0
+        },
+        "is_chat_model": false,
+        "lora_config": null,
+        "prefix": "ltx2_gemma",
+        "quant_config": null,
+        "treat_empty_as_dot": false
+      }
+    ],
+    "text_encoder_precisions": [
+      "bf16"
+    ],
+    "ti2v_task": false,
+    "upsampler_config": {
+      "arch_config": {
+        "stacked_params_mapping": []
+      }
+    },
+    "upsampler_precision": "fp32",
+    "vae_config": {
+      "arch_config": {
+        "_class_name": "CausalVideoAutoencoder",
+        "causal_decoder": false,
+        "decoder_blocks": [],
+        "decoder_spatial_padding_mode": "reflect",
+        "dims": 3,
+        "encoder_blocks": [],
+        "encoder_spatial_padding_mode": "zeros",
+        "in_channels": 3,
+        "latent_channels": 128,
+        "latent_log_var": "uniform",
+        "norm_layer": "pixel_norm",
+        "normalize_latent_channels": false,
+        "out_channels": 3,
+        "patch_size": 4,
+        "scaling_factor": 1.0,
+        "spatial_compression_ratio": 32,
+        "stacked_params_mapping": [],
+        "temporal_compression_ratio": 8,
+        "timestep_conditioning": true,
+        "use_quant_conv": false,
+        "z_dim": 128
+      },
+      "blend_num_frames": 4,
+      "load_decoder": true,
+      "load_encoder": false,
+      "ltx2_spatial_tile_overlap_in_pixels": 64,
+      "ltx2_spatial_tile_size_in_pixels": 512,
+      "ltx2_temporal_tile_overlap_in_frames": 24,
+      "ltx2_temporal_tile_size_in_frames": 64,
+      "tile_sample_min_height": 256,
+      "tile_sample_min_num_frames": 16,
+      "tile_sample_min_width": 256,
+      "tile_sample_stride_height": 192,
+      "tile_sample_stride_num_frames": 12,
+      "tile_sample_stride_width": 192,
+      "use_parallel_tiling": true,
+      "use_temporal_scaling_frames": true,
+      "use_temporal_tiling": true,
+      "use_tiling": true
+    },
+    "vae_precision": "bf16",
+    "vae_sp": false,
+    "vae_tiling": true,
+    "vocoder_config": {
+      "arch_config": {
+        "architectures": [
+          "LTX2Vocoder"
+        ],
+        "stacked_params_mapping": []
+      }
+    },
+    "vocoder_precision": "bf16"
+  },
+  "resolved": {
+    "fps": 24,
+    "height": 1088,
+    "linear_fp4_enabled": true,
+    "model_root": "/home/hal-jundas/.local/share/huggingface/hub/models--FastVideo--LTX2-Distilled-Diffusers/snapshots/0762ece944ea65f45cd3318981423e1670ff7225",
+    "num_frames": 121,
+    "num_inference_steps": 5,
+    "nvfp4_fa4_enabled": false,
+    "prompt": "A large metal cylinder is seen pressing down on a pile of Oreo cookies, flattening them as if they were under a hydraulic press.",
+    "refine_upsampler_path": "/home/hal-jundas/.local/share/huggingface/hub/models--FastVideo--LTX2-Distilled-Diffusers/snapshots/0762ece944ea65f45cd3318981423e1670ff7225/spatial_upsampler",
+    "sequence_parallel": {
+      "num_gpus": 4,
+      "sp_size": 4,
+      "tp_size": 1,
+      "ulysses_sequence_parallel": true
+    },
+    "torch_compile_enabled": true,
+    "torch_compile_kwargs": {
+      "backend": "inductor",
+      "dynamic": false,
+      "fullgraph": false
+    },
+    "width": 1920
+  },
+  "runtime": {
+    "argv": [
+      "examples/inference/basic/basic_ltx2_distilled_fast_profile.py",
+      "--profile-dir",
+      "outputs_video/ltx2_sp_profile/full",
+      "--run-name",
+      "fp4_linear_g4_compile_sp_fullgraph_false",
+      "--num-gpus",
+      "4",
+      "--sp-size",
+      "4",
+      "--tp-size",
+      "1",
+      "--num-runs",
+      "12",
+      "--warmup-runs",
+      "2",
+      "--num-frames",
+      "121",
+      "--num-inference-steps",
+      "5",
+      "--refine-num-inference-steps",
+      "2",
+      "--fp4-linear",
+      "--no-nvfp4-fa4",
+      "--torch-compile",
+      "--compile-text-encoder",
+      "--compile-vae",
+      "--no-compile-fullgraph"
+    ],
+    "cuda_available": true,
+    "cuda_device_count": 4,
+    "cuda_devices": [
+      "NVIDIA GB200",
+      "NVIDIA GB200",
+      "NVIDIA GB200",
+      "NVIDIA GB200"
+    ],
+    "env": {
+      "CUDA_VISIBLE_DEVICES": "0,1,2,3",
+      "FASTVIDEO_ATTENTION_BACKEND": "FLASH_ATTN",
+      "FASTVIDEO_NVFP4_FA4": "0",
+      "FASTVIDEO_STAGE_LOGGING": "1",
+      "HF_HOME": "/home/hal-jundas/.local/share/huggingface",
+      "SLURM_JOB_ID": "4745",
+      "SLURM_JOB_NODELIST": "hpc-rack-2-8",
+      "SLURM_PROCID": "0",
+      "SLURM_STEP_ID": "103",
+      "SLURM_STEP_NODELIST": "hpc-rack-2-8",
+      "TOKENIZERS_PARALLELISM": "false"
+    },
+    "git": {
+      "branch": "ltx2-sp-profile",
+      "head": "afdb6fbfa5a6349c6e270fdd4d84ac2a9a9485d2",
+      "status_short": "## ltx2-sp-profile...upstream/main\n M examples/inference/basic/basic_ltx2_distilled_fast_profile.py",
+      "upstream_main": "afdb6fbfa5a6349c6e270fdd4d84ac2a9a9485d2",
+      "worktree": "/home/hal-jundas/codes/FastVideo-ltx2-sp-profile"
+    },
+    "packages": {
+      "fastvideo": "0.1.7",
+      "flash-attn": "2.8.3",
+      "flash-attn-cute": "0.1.0",
+      "flashinfer-python": "0.6.6",
+      "nvidia-cutlass-dsl": "4.5.2",
+      "quack-kernels": "0.3.2",
+      "torch-c-dlpack-ext": "0.1.5"
+    },
+    "platform": "Linux-6.8.0-1031-nvidia-64k-aarch64-with-glibc2.39",
+    "python": "3.12.12 (main, Oct 14 2025, 21:26:46) [Clang 20.1.4 ]",
+    "torch_cuda_version": "12.8",
+    "torch_version": "2.11.0+cu128"
+  }
+}

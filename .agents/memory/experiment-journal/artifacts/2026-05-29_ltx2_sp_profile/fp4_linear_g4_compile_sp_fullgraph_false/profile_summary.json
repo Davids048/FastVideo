@@ -1,0 +1,437 @@
+{
+  "averages": {
+    "e2e_latency": 5.2689827986061575,
+    "non_stage_overhead": 0.032656647032126784,
+    "sr_forward_latency": 1.1849177884403617,
+    "stage_times": {
+      "AudioMuxStage": 0.0,
+      "PostDecodeFrameProcessStage": 0.09995584026910365,
+      "VideoSaveStage": 1.0354738363996148,
+      "audio_decoding_stage": 0.022347142454236746,
+      "decoding_stage": 0.33721562777645886,
+      "denoising_stage": 2.513197688711807,
+      "input_validation_stage": 4.566083662211895e-05,
+      "latent_preparation_stage": 0.0002284931018948555,
+      "ltx2_refine_denoising_stage": 1.1500986522529275,
+      "ltx2_refine_init_stage": 6.754877977073192e-05,
+      "ltx2_upsample_stage": 0.034819136187434194,
+      "prompt_encoding_stage": 0.04287652480416,
+      "total(stage sum avg)": 5.236326151574031
+    },
+    "video_generation_time": 4.1325035520363596
+  },
+  "measured_runs": 10,
+  "measured_start_run": 3,
+  "profile_config_path": "outputs_video/ltx2_sp_profile/full/fp4_linear_g4_compile_sp_fullgraph_false/profile_config.json",
+  "profile_log_path": "outputs_video/ltx2_sp_profile/full/fp4_linear_g4_compile_sp_fullgraph_false/profile.log",
+  "runs": [
+    {
+      "e2e_latency": 97.8567055859603,
+      "generation_time": 96.18759703123942,
+      "measured": false,
+      "non_stage_overhead": 8.596956951543689,
+      "output_path": "outputs_video/ltx2_sp_profile/full/fp4_linear_g4_compile_sp_fullgraph_false/videos/output_ltx2_basic_t2v_run_1.mp4",
+      "run_index": 1,
+      "sr_forward_latency": 15.117681556846946,
+      "sr_stage_entries": [
+        [
+          "ltx2_upsample_stage",
+          0.14432483073323965
+        ],
+        [
+          "ltx2_refine_denoising_stage",
+          14.973356726113707
+        ]
+      ],
+      "stage_sum": 89.25974863441661,
+      "stage_times": {
+        "AudioMuxStage": 0.0,
+        "PostDecodeFrameProcessStage": 0.11912607308477163,
+        "VideoSaveStage": 1.5484970710240304,
+        "audio_decoding_stage": 0.1529396609403193,
+        "decoding_stage": 22.036968936678022,
+        "denoising_stage": 32.14751233998686,
+        "input_validation_stage": 5.0208065658807755e-05,
+        "latent_preparation_stage": 0.0011675218120217323,
+        "ltx2_refine_denoising_stage": 14.973356726113707,
+        "ltx2_refine_init_stage": 0.00014329701662063599,
+        "ltx2_upsample_stage": 0.14432483073323965,
+        "prompt_encoding_stage": 18.135661968961358
+      }
+    },
+    {
+      "e2e_latency": 5.3917993269860744,
+      "generation_time": 4.058334364090115,
+      "measured": false,
+      "non_stage_overhead": 0.032300015445798635,
+      "output_path": "outputs_video/ltx2_sp_profile/full/fp4_linear_g4_compile_sp_fullgraph_false/videos/output_ltx2_basic_t2v_run_2.mp4",
+      "run_index": 2,
+      "sr_forward_latency": 1.1571598234586418,
+      "sr_stage_entries": [
+        [
+          "ltx2_upsample_stage",
+          0.03519103117287159
+        ],
+        [
+          "ltx2_refine_denoising_stage",
+          1.1219687922857702
+        ]
+      ],
+      "stage_sum": 5.359499311540276,
+      "stage_times": {
+        "AudioMuxStage": 0.0,
+        "PostDecodeFrameProcessStage": 0.09256280027329922,
+        "VideoSaveStage": 1.2398201120086014,
+        "audio_decoding_stage": 0.02308851620182395,
+        "decoding_stage": 0.33372196089476347,
+        "denoising_stage": 2.46934657311067,
+        "input_validation_stage": 6.236834451556206e-05,
+        "latent_preparation_stage": 0.0002644490450620651,
+        "ltx2_refine_denoising_stage": 1.1219687922857702,
+        "ltx2_refine_init_stage": 7.484806701540947e-05,
+        "ltx2_upsample_stage": 0.03519103117287159,
+        "prompt_encoding_stage": 0.04339786013588309
+      }
+    },
+    {
+      "e2e_latency": 5.140709794126451,
+      "generation_time": 4.09556009573862,
+      "measured": true,
+      "non_stage_overhead": 0.032297235913574696,
+      "output_path": "outputs_video/ltx2_sp_profile/full/fp4_linear_g4_compile_sp_fullgraph_false/videos/output_ltx2_basic_t2v_run_3.mp4",
+      "run_index": 3,
+      "sr_forward_latency": 1.1797808525152504,
+      "sr_stage_entries": [
+        [
+          "ltx2_upsample_stage",
+          0.03486536629498005
+        ],
+        [
+          "ltx2_refine_denoising_stage",
+          1.1449154862202704
+        ]
+      ],
+      "stage_sum": 5.108412558212876,
+      "stage_times": {
+        "AudioMuxStage": 0.0,
+        "PostDecodeFrameProcessStage": 0.0852356213144958,
+        "VideoSaveStage": 0.9588119951076806,
+        "audio_decoding_stage": 0.02295933198183775,
+        "decoding_stage": 0.3365211975760758,
+        "denoising_stage": 2.4813782442361116,
+        "input_validation_stage": 4.617637023329735e-05,
+        "latent_preparation_stage": 0.0002515842206776142,
+        "ltx2_refine_denoising_stage": 1.1449154862202704,
+        "ltx2_refine_init_stage": 7.455982267856598e-05,
+        "ltx2_upsample_stage": 0.03486536629498005,
+        "prompt_encoding_stage": 0.043352995067834854
+      }
+    },
+    {
+      "e2e_latency": 5.220206534955651,
+      "generation_time": 4.1941749448888,
+      "measured": true,
+      "non_stage_overhead": 0.03163060965016484,
+      "output_path": "outputs_video/ltx2_sp_profile/full/fp4_linear_g4_compile_sp_fullgraph_false/videos/output_ltx2_basic_t2v_run_4.mp4",
+      "run_index": 4,
+      "sr_forward_latency": 1.210418725386262,
+      "sr_stage_entries": [
+        [
+          "ltx2_upsample_stage",
+          0.03480655001476407
+        ],
+        [
+          "ltx2_refine_denoising_stage",
+          1.1756121753714979
+        ]
+      ],
+      "stage_sum": 5.188575925305486,
+      "stage_times": {
+        "AudioMuxStage": 0.0,
+        "PostDecodeFrameProcessStage": 0.08293081820011139,
+        "VideoSaveStage": 0.9420196185819805,
+        "audio_decoding_stage": 0.02295881975442171,
+        "decoding_stage": 0.3328319452702999,
+        "denoising_stage": 2.5543583310209215,
+        "input_validation_stage": 4.463968798518181e-05,
+        "latent_preparation_stage": 0.0002203201875090599,
+        "ltx2_refine_denoising_stage": 1.1756121753714979,
+        "ltx2_refine_init_stage": 6.435206159949303e-05,
+        "ltx2_upsample_stage": 0.03480655001476407,
+        "prompt_encoding_stage": 0.0427283551543951
+      }
+    },
+    {
+      "e2e_latency": 5.132931496948004,
+      "generation_time": 4.088394723832607,
+      "measured": true,
+      "non_stage_overhead": 0.0358824897557497,
+      "output_path": "outputs_video/ltx2_sp_profile/full/fp4_linear_g4_compile_sp_fullgraph_false/videos/output_ltx2_basic_t2v_run_5.mp4",
+      "run_index": 5,
+      "sr_forward_latency": 1.1690865033306181,
+      "sr_stage_entries": [
+        [
+          "ltx2_upsample_stage",
+          0.03474351018667221
+        ],
+        [
+          "ltx2_refine_denoising_stage",
+          1.134342993143946
+        ]
+      ],
+      "stage_sum": 5.097049007192254,
+      "stage_times": {
+        "AudioMuxStage": 0.0,
+        "PostDecodeFrameProcessStage": 0.09752364084124565,
+        "VideoSaveStage": 0.9459363310597837,
+        "audio_decoding_stage": 0.02259005093947053,
+        "decoding_stage": 0.33043744461610913,
+        "denoising_stage": 2.4885755451396108,
+        "input_validation_stage": 4.611210897564888e-05,
+        "latent_preparation_stage": 0.00022134371101856232,
+        "ltx2_refine_denoising_stage": 1.134342993143946,
+        "ltx2_refine_init_stage": 6.246427074074745e-05,
+        "ltx2_upsample_stage": 0.03474351018667221,
+        "prompt_encoding_stage": 0.04256957117468119
+      }
+    },
+    {
+      "e2e_latency": 5.234829138964415,
+      "generation_time": 4.173198544885963,
+      "measured": true,
+      "non_stage_overhead": 0.03310376685112715,
+      "output_path": "outputs_video/ltx2_sp_profile/full/fp4_linear_g4_compile_sp_fullgraph_false/videos/output_ltx2_basic_t2v_run_6.mp4",
+      "run_index": 6,
+      "sr_forward_latency": 1.2104912102222443,
+      "sr_stage_entries": [
+        [
+          "ltx2_upsample_stage",
+          0.03482533432543278
+        ],
+        [
+          "ltx2_refine_denoising_stage",
+          1.1756658758968115
+        ]
+      ],
+      "stage_sum": 5.2017253721132874,
+      "stage_times": {
+        "AudioMuxStage": 0.0,
+        "PostDecodeFrameProcessStage": 0.09646920673549175,
+        "VideoSaveStage": 0.9640907607972622,
+        "audio_decoding_stage": 0.01937078172340989,
+        "decoding_stage": 0.3417803440243006,
+        "denoising_stage": 2.526401593349874,
+        "input_validation_stage": 4.3103937059640884e-05,
+        "latent_preparation_stage": 0.00023273611441254616,
+        "ltx2_refine_denoising_stage": 1.1756658758968115,
+        "ltx2_refine_init_stage": 6.313621997833252e-05,
+        "ltx2_upsample_stage": 0.03482533432543278,
+        "prompt_encoding_stage": 0.042782498989254236
+      }
+    },
+    {
+      "e2e_latency": 5.077055205125362,
+      "generation_time": 4.019396550953388,
+      "measured": true,
+      "non_stage_overhead": 0.03207326587289572,
+      "output_path": "outputs_video/ltx2_sp_profile/full/fp4_linear_g4_compile_sp_fullgraph_false/videos/output_ltx2_basic_t2v_run_7.mp4",
+      "run_index": 7,
+      "sr_forward_latency": 1.147341129835695,
+      "sr_stage_entries": [
+        [
+          "ltx2_upsample_stage",
+          0.03495320677757263
+        ],
+        [
+          "ltx2_refine_denoising_stage",
+          1.1123879230581224
+        ]
+      ],
+      "stage_sum": 5.044981939252466,
+      "stage_times": {
+        "AudioMuxStage": 0.0,
+        "PostDecodeFrameProcessStage": 0.14796762401238084,
+        "VideoSaveStage": 0.9086147397756577,
+        "audio_decoding_stage": 0.022426691371947527,
+        "decoding_stage": 0.3358680163510144,
+        "denoising_stage": 2.439574198331684,
+        "input_validation_stage": 4.243198782205582e-05,
+        "latent_preparation_stage": 0.000222817063331604,
+        "ltx2_refine_denoising_stage": 1.1123879230581224,
+        "ltx2_refine_init_stage": 6.713578477501869e-05,
+        "ltx2_upsample_stage": 0.03495320677757263,
+        "prompt_encoding_stage": 0.04285715473815799
+      }
+    },
+    {
+      "e2e_latency": 5.130949059966952,
+      "generation_time": 4.1336656347848475,
+      "measured": true,
+      "non_stage_overhead": 0.03138692723587155,
+      "output_path": "outputs_video/ltx2_sp_profile/full/fp4_linear_g4_compile_sp_fullgraph_false/videos/output_ltx2_basic_t2v_run_8.mp4",
+      "run_index": 8,
+      "sr_forward_latency": 1.1772573720663786,
+      "sr_stage_entries": [
+        [
+          "ltx2_upsample_stage",
+          0.034790967125445604
+        ],
+        [
+          "ltx2_refine_denoising_stage",
+          1.142466404940933
+        ]
+      ],
+      "stage_sum": 5.09956213273108,
+      "stage_times": {
+        "AudioMuxStage": 0.0,
+        "PostDecodeFrameProcessStage": 0.08648077631369233,
+        "VideoSaveStage": 0.9097792548127472,
+        "audio_decoding_stage": 0.022457348182797432,
+        "decoding_stage": 0.3366572982631624,
+        "denoising_stage": 2.523911807220429,
+        "input_validation_stage": 4.726415500044823e-05,
+        "latent_preparation_stage": 0.0002314569428563118,
+        "ltx2_refine_denoising_stage": 1.142466404940933,
+        "ltx2_refine_init_stage": 6.527965888381004e-05,
+        "ltx2_upsample_stage": 0.034790967125445604,
+        "prompt_encoding_stage": 0.04267427511513233
+      }
+    },
+    {
+      "e2e_latency": 5.4813871891237795,
+      "generation_time": 4.204545754007995,
+      "measured": true,
+      "non_stage_overhead": 0.032456597313284874,
+      "output_path": "outputs_video/ltx2_sp_profile/full/fp4_linear_g4_compile_sp_fullgraph_false/videos/output_ltx2_basic_t2v_run_9.mp4",
+      "run_index": 9,
+      "sr_forward_latency": 1.2034814460203052,
+      "sr_stage_entries": [
+        [
+          "ltx2_upsample_stage",
+          0.034708757884800434
+        ],
+        [
+          "ltx2_refine_denoising_stage",
+          1.1687726881355047
+        ]
+      ],
+      "stage_sum": 5.448930591810495,
+      "stage_times": {
+        "AudioMuxStage": 0.0,
+        "PostDecodeFrameProcessStage": 0.10263459291309118,
+        "VideoSaveStage": 1.173197751864791,
+        "audio_decoding_stage": 0.02232141187414527,
+        "decoding_stage": 0.3363511539064348,
+        "denoising_stage": 2.567949480842799,
+        "input_validation_stage": 4.287995398044586e-05,
+        "latent_preparation_stage": 0.0002159997820854187,
+        "ltx2_refine_denoising_stage": 1.1687726881355047,
+        "ltx2_refine_init_stage": 6.2623992562294e-05,
+        "ltx2_upsample_stage": 0.034708757884800434,
+        "prompt_encoding_stage": 0.042673250660300255
+      }
+    },
+    {
+      "e2e_latency": 5.485847238916904,
+      "generation_time": 4.200667452067137,
+      "measured": true,
+      "non_stage_overhead": 0.03201445285230875,
+      "output_path": "outputs_video/ltx2_sp_profile/full/fp4_linear_g4_compile_sp_fullgraph_false/videos/output_ltx2_basic_t2v_run_10.mp4",
+      "run_index": 10,
+      "sr_forward_latency": 1.1934882812201977,
+      "sr_stage_entries": [
+        [
+          "ltx2_upsample_stage",
+          0.034937974996864796
+        ],
+        [
+          "ltx2_refine_denoising_stage",
+          1.1585503062233329
+        ]
+      ],
+      "stage_sum": 5.453832786064595,
+      "stage_times": {
+        "AudioMuxStage": 0.0,
+        "PostDecodeFrameProcessStage": 0.12028838135302067,
+        "VideoSaveStage": 1.1638897070661187,
+        "audio_decoding_stage": 0.022802691906690598,
+        "decoding_stage": 0.34532614471390843,
+        "denoising_stage": 2.5647822488099337,
+        "input_validation_stage": 4.6560075134038925e-05,
+        "latent_preparation_stage": 0.0002152961678802967,
+        "ltx2_refine_denoising_stage": 1.1585503062233329,
+        "ltx2_refine_init_stage": 7.100775837898254e-05,
+        "ltx2_upsample_stage": 0.034937974996864796,
+        "prompt_encoding_stage": 0.04292246699333191
+      }
+    },
+    {
+      "e2e_latency": 5.390267418697476,
+      "generation_time": 4.109725173097104,
+      "measured": true,
+      "non_stage_overhead": 0.034175251610577106,
+      "output_path": "outputs_video/ltx2_sp_profile/full/fp4_linear_g4_compile_sp_fullgraph_false/videos/output_ltx2_basic_t2v_run_11.mp4",
+      "run_index": 11,
+      "sr_forward_latency": 1.1719322176650167,
+      "sr_stage_entries": [
+        [
+          "ltx2_upsample_stage",
+          0.03481477499008179
+        ],
+        [
+          "ltx2_refine_denoising_stage",
+          1.1371174426749349
+        ]
+      ],
+      "stage_sum": 5.356092167086899,
+      "stage_times": {
+        "AudioMuxStage": 0.0,
+        "PostDecodeFrameProcessStage": 0.08783370722085238,
+        "VideoSaveStage": 1.1916942331008613,
+        "audio_decoding_stage": 0.02236381219699979,
+        "decoding_stage": 0.33663889998570085,
+        "denoising_stage": 2.501979500055313,
+        "input_validation_stage": 4.8832036554813385e-05,
+        "latent_preparation_stage": 0.000247360672801733,
+        "ltx2_refine_denoising_stage": 1.1371174426749349,
+        "ltx2_refine_init_stage": 7.436797022819519e-05,
+        "ltx2_upsample_stage": 0.03481477499008179,
+        "prompt_encoding_stage": 0.04327923618257046
+      }
+    },
+    {
+      "e2e_latency": 5.39564490923658,
+      "generation_time": 4.105706646107137,
+      "measured": true,
+      "non_stage_overhead": 0.03154587326571345,
+      "output_path": "outputs_video/ltx2_sp_profile/full/fp4_linear_g4_compile_sp_fullgraph_false/videos/output_ltx2_basic_t2v_run_12.mp4",
+      "run_index": 12,
+      "sr_forward_latency": 1.1859001461416483,
+      "sr_stage_entries": [
+        [
+          "ltx2_upsample_stage",
+          0.034744919277727604
+        ],
+        [
+          "ltx2_refine_denoising_stage",
+          1.1511552268639207
+        ]
+      ],
+      "stage_sum": 5.364099035970867,
+      "stage_times": {
+        "AudioMuxStage": 0.0,
+        "PostDecodeFrameProcessStage": 0.09219403378665447,
+        "VideoSaveStage": 1.1967039718292654,
+        "audio_decoding_stage": 0.023220484610646963,
+        "decoding_stage": 0.3397438330575824,
+        "denoising_stage": 2.4830659381113946,
+        "input_validation_stage": 4.860805347561836e-05,
+        "latent_preparation_stage": 0.00022601615637540817,
+        "ltx2_refine_denoising_stage": 1.1511552268639207,
+        "ltx2_refine_init_stage": 7.05602578818798e-05,
+        "ltx2_upsample_stage": 0.034744919277727604,
+        "prompt_encoding_stage": 0.04292544396594167
+      }
+    }
+  ]
+}
