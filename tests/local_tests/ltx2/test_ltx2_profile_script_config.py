@@ -2,6 +2,8 @@
 import importlib.util
 from pathlib import Path
 
+import pytest
+
 
 def _load_profile_module():
     repo_root = Path(__file__).resolve().parents[3]
@@ -14,41 +16,84 @@ def _load_profile_module():
     return module
 
 
-def test_ltx2_profile_defaults_use_eight_base_steps_and_three_refine_steps():
+def test_ltx2_profile_defaults_match_sweep_defaults():
     profile = _load_profile_module()
 
     args = profile.parse_args([])
     profile.validate_args(args)
 
+    assert args.num_gpus == 1
     assert args.num_inference_steps == 8
     assert args.refine_num_inference_steps == 3
-    assert args.stage_logging is True
-
-
-def test_ltx2_profile_sp_defaults_to_num_gpus_and_graph_break_compile():
-    profile = _load_profile_module()
-
-    args = profile.parse_args(["--num-gpus", "4"])
-    profile.validate_args(args)
-
-    assert args.sp_size == 4
-    assert args.compile_fullgraph is False
-
-
-def test_ltx2_profile_explicit_fullgraph_override_is_preserved():
-    profile = _load_profile_module()
-
-    args = profile.parse_args(["--num-gpus", "4", "--compile-fullgraph"])
-    profile.validate_args(args)
-
-    assert args.sp_size == 4
+    assert args.fp4_linear is True
     assert args.compile_fullgraph is True
 
 
-def test_ltx2_profile_config_records_base_and_refine_step_counts():
+@pytest.mark.parametrize(
+    ("base_steps", "refine_steps"),
+    [
+        (5, 2),
+        (8, 3),
+    ],
+)
+def test_ltx2_profile_accepts_only_sweep_step_pairs(base_steps, refine_steps):
     profile = _load_profile_module()
 
-    args = profile.parse_args(["--num-gpus", "2", "--no-save-video", "--no-stage-logging"])
+    args = profile.parse_args([
+        "--num-inference-steps",
+        str(base_steps),
+        "--refine-num-inference-steps",
+        str(refine_steps),
+    ])
+
+    profile.validate_args(args)
+
+
+def test_ltx2_profile_rejects_mixed_step_pairs():
+    profile = _load_profile_module()
+
+    args = profile.parse_args([
+        "--num-inference-steps",
+        "5",
+        "--refine-num-inference-steps",
+        "3",
+    ])
+
+    with pytest.raises(ValueError, match="Expected 5\\+2 or 8\\+3"):
+        profile.validate_args(args)
+
+
+def test_ltx2_profile_run_name_uses_only_sweep_dimensions():
+    profile = _load_profile_module()
+
+    args = profile.parse_args([
+        "--num-gpus",
+        "4",
+        "--num-inference-steps",
+        "5",
+        "--refine-num-inference-steps",
+        "2",
+        "--no-fp4-linear",
+        "--no-compile-fullgraph",
+    ])
+    profile.validate_args(args)
+
+    assert profile.run_name(args) == "ltx2_speed_s5p2_g4_fp4off_fgoff"
+
+
+def test_ltx2_profile_config_records_tuned_and_fixed_settings():
+    profile = _load_profile_module()
+
+    args = profile.parse_args([
+        "--num-gpus",
+        "2",
+        "--num-inference-steps",
+        "5",
+        "--refine-num-inference-steps",
+        "2",
+        "--no-fp4-linear",
+        "--compile-fullgraph",
+    ])
     profile.validate_args(args)
     compile_kwargs = profile.build_torch_compile_kwargs(args)
     config = profile.build_profile_config(
@@ -66,22 +111,21 @@ def test_ltx2_profile_config_records_base_and_refine_step_counts():
         },
     )
 
-    assert config["resolved"]["num_inference_steps"] == 8
-    assert config["resolved"]["refine_num_inference_steps"] == 3
-    assert config["resolved"]["save_video"] is False
-    assert config["resolved"]["return_frames"] is False
-    assert config["resolved"]["stage_logging_enabled"] is False
-    assert config["resolved"]["sequence_parallel"]["sp_size"] == 2
-    assert config["resolved"]["torch_compile_kwargs"]["fullgraph"] is False
-
-
-def test_ltx2_profile_configure_environment_can_disable_stage_logging(monkeypatch):
-    profile = _load_profile_module()
-
-    monkeypatch.delenv("FASTVIDEO_STAGE_LOGGING", raising=False)
-    args = profile.parse_args(["--no-stage-logging"])
-    profile.validate_args(args)
-
-    profile.configure_environment(args)
-
-    assert profile.os.environ["FASTVIDEO_STAGE_LOGGING"] == "0"
+    assert config["tuned"] == {
+        "num_inference_steps": 5,
+        "refine_num_inference_steps": 2,
+        "num_gpus": 2,
+        "sp_size": 2,
+        "fp4_linear": False,
+        "compile_fullgraph": True,
+    }
+    assert config["fixed"]["save_video"] is False
+    assert config["fixed"]["return_frames"] is True
+    assert config["fixed"]["stage_logging"] is True
+    assert config["fixed"]["nvfp4_fa4"] is False
+    assert config["fixed"]["tp_size"] == 1
+    assert config["resolved"]["torch_compile_kwargs"] == {
+        "backend": "inductor",
+        "fullgraph": True,
+        "dynamic": False,
+    }

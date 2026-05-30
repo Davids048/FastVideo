@@ -138,10 +138,6 @@ register_profiler_region(
 #     "Post-processing after denoising (decoder, conditioning restores).",
 # )
 register_profiler_region(
-    name="profiler_region_inference_forward",
-    description="End-to-end inference pipeline forward pass after model loading.",
-)
-register_profiler_region(
     name="profiler_region_training_save_checkpoint",
     description="Training save checkpoint operations.",
 )
@@ -352,11 +348,6 @@ class TorchProfilerController:
             self._profiler.toggle_collection_dynamic(enabled, self._activities)
         self._collection_enabled = enabled
 
-    def step(self) -> None:
-        if self._profiler is None:
-            return
-        self._profiler.step()
-
     @contextlib.contextmanager
     def region(self, region: str):
         """Context manager that enables profiling for ``region`` if configured."""
@@ -383,7 +374,6 @@ class TorchProfilerController:
                 if self._active_region_depth == 0:
                     logger.info("PROFILER: Setting collection to False upon exiting region %s", region)
                     self._set_collection(False)
-                    self.step()
 
     def start(self) -> None:
         """Start the profiler and pause collection until a region is entered."""
@@ -401,15 +391,12 @@ class TorchProfilerController:
     def stop(self) -> None:
         """Stop the profiler after disabling collection and clearing state."""
 
-        profiler = self._profiler
-        if profiler is None:
+        if self._profiler is None:
             return
 
         logger.info("PROFILER: Stopping profiler...")
-        profiler.stop()
+        self._profiler.stop()
         logger.info("PROFILER: Profiler stopped")
-        self._profiler = None
-        self._collection_enabled = False
         self._active_region_depth = 0
         set_global_profiler(None)
         set_global_controller(None)

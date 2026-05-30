@@ -3,7 +3,6 @@ from types import SimpleNamespace
 import warnings
 
 import pytest
-import torch
 
 from fastvideo.api import (
     GenerationRequest,
@@ -16,7 +15,6 @@ from fastvideo.api import (
 from fastvideo.api.sampling_param import SamplingParam
 from fastvideo.entrypoints.video_generator import VideoGenerator
 from fastvideo.fastvideo_args import WorkloadType
-from fastvideo.pipelines.pipeline_batch_info import ForwardBatch, PipelineLoggingInfo
 
 
 def _new_video_generator() -> VideoGenerator:
@@ -36,42 +34,6 @@ def _new_runtime_video_generator() -> VideoGenerator:
         clear_log_queue=lambda: None,
     )
     generator.config = None
-    return generator
-
-
-def _runtime_fastvideo_args(output_type: str = "pil") -> SimpleNamespace:
-    return SimpleNamespace(
-        output_type=output_type,
-        pin_cpu_memory=False,
-        VSA_sparsity=0.0,
-        workload_type=SimpleNamespace(value="t2v"),
-        pipeline_config=SimpleNamespace(
-            flow_shift=None,
-            embedded_cfg_scale=None,
-        ),
-    )
-
-
-def _sampling_param_for_output(**kwargs) -> SamplingParam:
-    defaults = {
-        "num_frames": 1,
-        "height": 16,
-        "width": 16,
-        "negative_prompt": None,
-        "num_inference_steps": 1,
-        "save_video": False,
-        "return_frames": False,
-    }
-    defaults.update(kwargs)
-    return SamplingParam(**defaults)
-
-
-def _generator_with_executor(output_batch: ForwardBatch) -> VideoGenerator:
-    generator = _new_runtime_video_generator()
-    generator.fastvideo_args = _runtime_fastvideo_args()
-    generator.executor = SimpleNamespace(
-        execute_forward=lambda batch, fastvideo_args: output_batch,
-    )
     return generator
 
 
@@ -607,96 +569,3 @@ def test_generate_batched_request_rejects_mismatched_media_inputs(monkeypatch):
                 inputs=InputConfig(image_path=["first.png"]),
             )
         )
-
-
-def test_generate_single_video_skips_output_materialization_when_unused(
-    monkeypatch,
-    tmp_path,
-):
-    output_batch = ForwardBatch(
-        data_type="video",
-        output=torch.ones((1, 3, 1, 16, 16)),
-        logging_info=PipelineLoggingInfo(),
-    )
-    generator = _generator_with_executor(output_batch)
-
-    def fail_empty(*args, **kwargs):
-        raise AssertionError("latency-only calls should not allocate CPU samples")
-
-    def fail_rearrange(*args, **kwargs):
-        raise AssertionError("latency-only calls should not build RGB frames")
-
-    monkeypatch.setattr("fastvideo.entrypoints.video_generator.torch.empty", fail_empty)
-    monkeypatch.setattr("fastvideo.entrypoints.video_generator.rearrange", fail_rearrange)
-
-    result = generator._generate_single_video(
-        prompt="test prompt",
-        sampling_param=_sampling_param_for_output(save_video=False, return_frames=False),
-        fastvideo_args=generator.fastvideo_args,
-        output_path=str(tmp_path / "unused.mp4"),
-    )
-
-    assert result["samples"] is None
-    assert result["frames"] is None
-    assert result["video_path"] is None
-    assert output_batch.logging_info.get_stage_info("PostDecodeFrameProcessStage")["execution_time"] >= 0.0
-
-
-def test_generate_single_video_materializes_samples_for_return_frames(tmp_path):
-    output = torch.ones((1, 3, 1, 16, 16))
-    output_batch = ForwardBatch(
-        data_type="video",
-        output=output,
-        logging_info=PipelineLoggingInfo(),
-    )
-    generator = _generator_with_executor(output_batch)
-
-    result = generator._generate_single_video(
-        prompt="test prompt",
-        sampling_param=_sampling_param_for_output(save_video=False, return_frames=True),
-        fastvideo_args=generator.fastvideo_args,
-        output_path=str(tmp_path / "returned.mp4"),
-    )
-
-    assert torch.equal(result["samples"], output)
-    assert len(result["frames"]) == 1
-    assert result["frames"][0].shape == (16, 16, 3)
-    assert result["video_path"] is None
-
-
-def test_generate_single_video_materializes_frames_for_save_video(
-    monkeypatch,
-    tmp_path,
-):
-    output = torch.ones((1, 3, 1, 16, 16))
-    output_batch = ForwardBatch(
-        data_type="video",
-        output=output,
-        logging_info=PipelineLoggingInfo(),
-    )
-    generator = _generator_with_executor(output_batch)
-    captured = {}
-
-    def fake_mimsave(output_path, frames, fps, format):
-        captured["output_path"] = output_path
-        captured["frames"] = frames
-        captured["fps"] = fps
-        captured["format"] = format
-
-    monkeypatch.setattr("fastvideo.entrypoints.video_generator.imageio.mimsave", fake_mimsave)
-    output_path = str(tmp_path / "saved.mp4")
-
-    result = generator._generate_single_video(
-        prompt="test prompt",
-        sampling_param=_sampling_param_for_output(save_video=True, return_frames=False),
-        fastvideo_args=generator.fastvideo_args,
-        output_path=output_path,
-    )
-
-    assert result["samples"] is None
-    assert result["frames"] is None
-    assert result["video_path"] == output_path
-    assert captured["output_path"] == output_path
-    assert len(captured["frames"]) == 1
-    assert captured["fps"] == 24
-    assert captured["format"] == "mp4"

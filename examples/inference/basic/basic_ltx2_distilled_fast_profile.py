@@ -4,75 +4,53 @@ from __future__ import annotations
 import argparse
 import json
 import os
-import platform
-import subprocess
 import sys
 import time
 from collections import OrderedDict
 from collections.abc import Mapping
 from dataclasses import asdict, is_dataclass
-from datetime import datetime, timezone
-from importlib import metadata
 from pathlib import Path
 from typing import Any
 
 import torch
 import torch._inductor.config
+from fastvideo import VideoGenerator
+from fastvideo.configs.pipelines.base import PipelineConfig
+from fastvideo.layers.quantization.nvfp4_config import NVFP4Config
+from fastvideo.utils import maybe_download_model
 
 VALIDATION_JSON = (
     Path(__file__).resolve().parents[2] / "training" / "finetune" / "ltx2" / "validation.json"
 )
-DEFAULT_MODEL_ID = "FastVideo/LTX2-Distilled-Diffusers"
-DEFAULT_PROFILE_DIR = Path(os.getenv("LTX2_PROFILE_DIR", "outputs_video/ltx2_distilled_fast_profile"))
-DEFAULT_NUM_INFERENCE_STEPS = 8
-DEFAULT_REFINE_NUM_INFERENCE_STEPS = 3
-
-ENV_KEYS_TO_RECORD = (
-    "CUDA_VISIBLE_DEVICES",
-    "CUDA_CACHE_PATH",
-    "FASTVIDEO_ATTENTION_BACKEND",
-    "FASTVIDEO_LTX2_BLOCK_PROFILE_ACTIVE_OCCURRENCES",
-    "FASTVIDEO_LTX2_BLOCK_PROFILE_CAPTURE_RANGE",
-    "FASTVIDEO_LTX2_BLOCK_PROFILE_INDEX",
-    "FASTVIDEO_LTX2_BLOCK_PROFILE_SKIP_OCCURRENCES",
-    "FASTVIDEO_LTX2_BLOCK_PROFILE_STAGE",
-    "FASTVIDEO_LOGGING_LEVEL",
-    "FASTVIDEO_NVFP4_FA4",
-    "FASTVIDEO_SR_LATENCY_STAGE_SUBSTR",
-    "FASTVIDEO_STAGE_LOGGING",
-    "FASTVIDEO_TORCH_PROFILER_ACTIVE_STEPS",
-    "FASTVIDEO_TORCH_PROFILER_DIR",
-    "FASTVIDEO_TORCH_PROFILER_RECORD_SHAPES",
-    "FASTVIDEO_TORCH_PROFILER_WAIT_STEPS",
-    "FASTVIDEO_TORCH_PROFILER_WARMUP_STEPS",
-    "FASTVIDEO_TORCH_PROFILER_WITH_FLOPS",
-    "FASTVIDEO_TORCH_PROFILER_WITH_PROFILE_MEMORY",
-    "FASTVIDEO_TORCH_PROFILER_WITH_STACK",
-    "FASTVIDEO_TORCH_PROFILE_REGIONS",
-    "HF_HOME",
-    "HF_HUB_CACHE",
-    "LTX2_MODEL_PATH",
-    "LTX2_PROFILE_DIR",
-    "LTX2_REFINE_UPSAMPLER_PATH",
-    "LOCAL_RANK",
-    "MASTER_ADDR",
-    "MASTER_PORT",
-    "NCCL_ASYNC_ERROR_HANDLING",
-    "PYTORCH_CUDA_ALLOC_CONF",
-    "RANK",
-    "SLURM_JOB_ID",
-    "SLURM_JOB_NODELIST",
-    "SLURM_PROCID",
-    "SLURM_STEP_ID",
-    "SLURM_STEP_NODELIST",
-    "TOKENIZERS_PARALLELISM",
-    "TORCHINDUCTOR_CACHE_DIR",
-    "TRANSFORMERS_CACHE",
-    "TRITON_CACHE_DIR",
-    "TQDM_DISABLE",
-    "WORLD_SIZE",
-    "XDG_CACHE_HOME",
+MODEL_ID = os.path.expandvars(
+    os.path.expanduser(os.getenv("LTX2_MODEL_PATH", "FastVideo/LTX2-Distilled-Diffusers"))
 )
+OUTPUT_ROOT = Path("outputs_video/ltx2_generation_speed_sweep")
+
+NUM_RUNS = 12
+WARMUP_RUNS = 2
+TP_SIZE = 1
+DISTRIBUTED_EXECUTOR_BACKEND = "mp"
+ATTENTION_BACKEND = "FLASH_ATTN"
+NUM_FRAMES = 121
+FPS = 24
+SEED = 10
+GUIDANCE_SCALE = 1.0
+REFINE_GUIDANCE_SCALE = 1.0
+REFINE_ADD_NOISE = True
+LTX2_VAE_TILING = False
+SAVE_VIDEO = False
+RETURN_FRAMES = True
+NVFP4_FA4 = False
+TORCH_COMPILE = True
+COMPILE_TEXT_ENCODER = True
+COMPILE_VAE = True
+COMPILE_BACKEND = "inductor"
+COMPILE_DYNAMIC = False
+STAGE_LOGGING = True
+DIT_CPU_OFFLOAD = False
+TEXT_ENCODER_CPU_OFFLOAD = False
+VAE_CPU_OFFLOAD = False
 
 
 class Tee:
@@ -91,34 +69,12 @@ class Tee:
 
 def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser = argparse.ArgumentParser(
-        description="Profile LTX-2 distilled inference with optional Ulysses sequence parallelism.",
+        description="Run one LTX-2 generation speed sweep cell.",
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
     )
-    parser.add_argument("--model-id", default=os.getenv("LTX2_MODEL_PATH", DEFAULT_MODEL_ID))
-    parser.add_argument("--profile-dir", type=Path, default=DEFAULT_PROFILE_DIR)
-    parser.add_argument("--run-name", default=None, help="Subdirectory name under --profile-dir.")
-    parser.add_argument("--validation-json", type=Path, default=VALIDATION_JSON)
-    parser.add_argument("--num-gpus", type=int, default=int(os.getenv("FASTVIDEO_PROFILE_NUM_GPUS", "1")))
-    parser.add_argument("--sp-size", type=int, default=None, help="Sequence parallel size. Defaults to num_gpus.")
-    parser.add_argument("--tp-size", type=int, default=1)
-    parser.add_argument("--distributed-executor-backend", choices=("mp", "ray"), default="mp")
-    parser.add_argument("--attention-backend", default="FLASH_ATTN")
-    parser.add_argument("--num-runs", type=int, default=12)
-    parser.add_argument("--warmup-runs", type=int, default=2)
-    parser.add_argument("--avg-window", type=int, default=None)
-    parser.add_argument("--seed", type=int, default=10)
-    parser.add_argument("--height", type=int, default=None)
-    parser.add_argument("--width", type=int, default=None)
-    parser.add_argument("--num-frames", type=int, default=121)
-    parser.add_argument("--num-inference-steps", type=int, default=DEFAULT_NUM_INFERENCE_STEPS)
-    parser.add_argument("--fps", type=int, default=24)
-    parser.add_argument("--guidance-scale", type=float, default=1.0)
-    parser.add_argument("--refine-num-inference-steps", type=int, default=DEFAULT_REFINE_NUM_INFERENCE_STEPS)
-    parser.add_argument("--refine-guidance-scale", type=float, default=1.0)
-    parser.add_argument("--refine-add-noise", action=argparse.BooleanOptionalAction, default=True)
-    parser.add_argument("--ltx2-vae-tiling", action=argparse.BooleanOptionalAction, default=False)
-    parser.add_argument("--save-video", action=argparse.BooleanOptionalAction, default=True)
-    parser.add_argument("--return-frames", action=argparse.BooleanOptionalAction, default=False)
+    parser.add_argument("--num-gpus", type=int, choices=(1, 2, 4), default=1)
+    parser.add_argument("--num-inference-steps", type=int, choices=(5, 8), default=8)
+    parser.add_argument("--refine-num-inference-steps", type=int, choices=(2, 3), default=3)
     parser.add_argument(
         "--fp4-linear",
         action=argparse.BooleanOptionalAction,
@@ -126,70 +82,37 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         help="Enable LTX-2 NVFP4 quantization for selected linear layers.",
     )
     parser.add_argument(
-        "--nvfp4-fa4",
-        action=argparse.BooleanOptionalAction,
-        default=False,
-        help="Enable FP4 Q/K FlashAttention 4. Leave disabled for no-FP4 experiments.",
-    )
-    parser.add_argument("--torch-compile", action=argparse.BooleanOptionalAction, default=True)
-    parser.add_argument("--compile-text-encoder", action=argparse.BooleanOptionalAction, default=True)
-    parser.add_argument("--compile-vae", action=argparse.BooleanOptionalAction, default=True)
-    parser.add_argument("--compile-backend", default="inductor")
-    parser.add_argument("--compile-mode", default=None)
-    parser.add_argument(
         "--compile-fullgraph",
         action=argparse.BooleanOptionalAction,
-        default=None,
-        help="Defaults to true for single-GPU and false when sequence parallelism is enabled.",
-    )
-    parser.add_argument("--compile-dynamic", action=argparse.BooleanOptionalAction, default=False)
-    parser.add_argument(
-        "--stage-logging",
-        action=argparse.BooleanOptionalAction,
         default=True,
-        help="Enable per-stage timing logs. Disable for lowest-overhead latency runs.",
+        help="Compile with fullgraph=True for the DiT/text encoder/VAE compile kwargs.",
     )
     return parser.parse_args(argv)
 
 
 def validate_args(args: argparse.Namespace) -> None:
-    if args.sp_size is None:
-        args.sp_size = args.num_gpus
-    if args.num_gpus < 1:
-        raise ValueError(f"--num-gpus must be >= 1, got {args.num_gpus}")
-    if args.tp_size < 1:
-        raise ValueError(f"--tp-size must be >= 1, got {args.tp_size}")
-    if args.sp_size < 1:
-        raise ValueError(f"--sp-size must be >= 1, got {args.sp_size}")
-    if args.sp_size > args.num_gpus or args.num_gpus % args.sp_size != 0:
-        raise ValueError(f"--num-gpus ({args.num_gpus}) must be divisible by --sp-size ({args.sp_size})")
-    if args.num_runs <= 0:
-        raise ValueError(f"--num-runs must be > 0, got {args.num_runs}")
-    if args.warmup_runs < 0:
-        raise ValueError(f"--warmup-runs must be >= 0, got {args.warmup_runs}")
-    if args.warmup_runs >= args.num_runs:
-        raise ValueError("--warmup-runs must be smaller than --num-runs")
-    if args.avg_window is not None and args.avg_window <= 0:
-        raise ValueError(f"--avg-window must be > 0, got {args.avg_window}")
-    if args.compile_fullgraph is None:
-        args.compile_fullgraph = args.sp_size <= 1
+    schedule = (args.num_inference_steps, args.refine_num_inference_steps)
+    if schedule not in {(5, 2), (8, 3)}:
+        raise ValueError(
+            "Unsupported LTX-2 sweep schedule. Expected 5+2 or 8+3, "
+            f"got {args.num_inference_steps}+{args.refine_num_inference_steps}."
+        )
+
+
+def run_name(args: argparse.Namespace) -> str:
+    fp4 = "fp4on" if args.fp4_linear else "fp4off"
+    fullgraph = "fgon" if args.compile_fullgraph else "fgoff"
+    return (
+        f"ltx2_speed_s{args.num_inference_steps}p{args.refine_num_inference_steps}"
+        f"_g{args.num_gpus}_{fp4}_{fullgraph}"
+    )
 
 
 def make_run_dir(args: argparse.Namespace) -> Path:
-    timestamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
-    linear_mode = "linear-fp4" if args.fp4_linear else "linear-bf16"
-    fa4_mode = "fa4-fp4qk" if args.nvfp4_fa4 else "fa4-bf16qk"
-    compile_mode = "compile" if args.torch_compile else "eager"
-    run_name = args.run_name or f"{timestamp}_g{args.num_gpus}_sp{args.sp_size}_{linear_mode}_{fa4_mode}_{compile_mode}"
-    run_dir = args.profile_dir / run_name
-    if not run_dir.exists():
-        return run_dir
-    suffix = 2
-    while True:
-        candidate = args.profile_dir / f"{run_name}_{suffix}"
-        if not candidate.exists():
-            return candidate
-        suffix += 1
+    run_dir = OUTPUT_ROOT / run_name(args)
+    if run_dir.exists():
+        raise FileExistsError(f"Run directory already exists: {run_dir}")
+    return run_dir
 
 
 def load_validation_entries(path: Path) -> list[dict]:
@@ -244,20 +167,15 @@ def extract_sr_forward_latency(
         return None, [], []
 
     stage_names = list(stage_times.keys())
-    sr_match_substr = os.getenv("FASTVIDEO_SR_LATENCY_STAGE_SUBSTR", "").strip().lower()
-
     sr_stage_entries: list[tuple[str, float]] = []
     for stage_name, exec_time in stage_times.items():
         stage_name_l = stage_name.lower()
-        if sr_match_substr:
-            is_sr_stage = sr_match_substr in stage_name_l
-        else:
-            is_sr_stage = (
-                "srdenoisingstage" in stage_name_l
-                or "sr_denoising" in stage_name_l
-                or "upsample" in stage_name_l
-                or ("refine" in stage_name_l and "denois" in stage_name_l)
-            )
+        is_sr_stage = (
+            "srdenoisingstage" in stage_name_l
+            or "sr_denoising" in stage_name_l
+            or "upsample" in stage_name_l
+            or ("refine" in stage_name_l and "denois" in stage_name_l)
+        )
         if is_sr_stage:
             sr_stage_entries.append((stage_name, exec_time))
 
@@ -326,13 +244,11 @@ def resolve_refine_upsampler_path(model_root: str) -> Path:
     )
 
 
-def configure_environment(args: argparse.Namespace) -> None:
-    os.environ["FASTVIDEO_ATTENTION_BACKEND"] = args.attention_backend
-    os.environ["FASTVIDEO_STAGE_LOGGING"] = "1" if args.stage_logging else "0"
-    os.environ["FASTVIDEO_NVFP4_FA4"] = "1" if args.nvfp4_fa4 else "0"
+def configure_environment() -> None:
+    os.environ["FASTVIDEO_ATTENTION_BACKEND"] = ATTENTION_BACKEND
+    os.environ["FASTVIDEO_STAGE_LOGGING"] = "1" if STAGE_LOGGING else "0"
+    os.environ["FASTVIDEO_NVFP4_FA4"] = "1" if NVFP4_FA4 else "0"
     os.environ.setdefault("TOKENIZERS_PARALLELISM", "false")
-    if args.nvfp4_fa4:
-        os.environ.setdefault("CUTE_DSL_ENABLE_TVM_FFI", "1")
 
 
 def configure_inductor() -> None:
@@ -344,14 +260,43 @@ def configure_inductor() -> None:
 
 
 def build_torch_compile_kwargs(args: argparse.Namespace) -> dict[str, Any]:
-    compile_kwargs = {
-        "backend": args.compile_backend,
+    return {
+        "backend": COMPILE_BACKEND,
         "fullgraph": args.compile_fullgraph,
-        "dynamic": args.compile_dynamic,
+        "dynamic": COMPILE_DYNAMIC,
     }
-    if args.compile_mode:
-        compile_kwargs["mode"] = args.compile_mode
-    return compile_kwargs
+
+
+def fixed_settings() -> dict[str, Any]:
+    return {
+        "model_id": MODEL_ID,
+        "validation_json": str(VALIDATION_JSON),
+        "output_root": str(OUTPUT_ROOT),
+        "num_runs": NUM_RUNS,
+        "warmup_runs": WARMUP_RUNS,
+        "tp_size": TP_SIZE,
+        "distributed_executor_backend": DISTRIBUTED_EXECUTOR_BACKEND,
+        "attention_backend": ATTENTION_BACKEND,
+        "num_frames": NUM_FRAMES,
+        "fps": FPS,
+        "seed": SEED,
+        "guidance_scale": GUIDANCE_SCALE,
+        "refine_guidance_scale": REFINE_GUIDANCE_SCALE,
+        "refine_add_noise": REFINE_ADD_NOISE,
+        "ltx2_vae_tiling": LTX2_VAE_TILING,
+        "save_video": SAVE_VIDEO,
+        "return_frames": RETURN_FRAMES,
+        "nvfp4_fa4": NVFP4_FA4,
+        "torch_compile": TORCH_COMPILE,
+        "compile_text_encoder": COMPILE_TEXT_ENCODER,
+        "compile_vae": COMPILE_VAE,
+        "compile_backend": COMPILE_BACKEND,
+        "compile_dynamic": COMPILE_DYNAMIC,
+        "stage_logging": STAGE_LOGGING,
+        "dit_cpu_offload": DIT_CPU_OFFLOAD,
+        "text_encoder_cpu_offload": TEXT_ENCODER_CPU_OFFLOAD,
+        "vae_cpu_offload": VAE_CPU_OFFLOAD,
+    }
 
 
 def json_ready(value: Any) -> Any:
@@ -387,63 +332,6 @@ def write_json(path: Path, payload: Mapping[str, Any]) -> None:
         f.write("\n")
 
 
-def run_git(args: list[str]) -> str | None:
-    try:
-        result = subprocess.run(
-            ["git", *args],
-            cwd=Path(__file__).resolve().parents[3],
-            check=True,
-            capture_output=True,
-            text=True,
-        )
-        return result.stdout.strip()
-    except Exception:
-        return None
-
-
-def package_version(name: str) -> str | None:
-    try:
-        return metadata.version(name)
-    except metadata.PackageNotFoundError:
-        return None
-
-
-def environment_snapshot() -> dict[str, str]:
-    return {key: os.environ[key] for key in ENV_KEYS_TO_RECORD if key in os.environ}
-
-
-def runtime_snapshot() -> dict[str, Any]:
-    return {
-        "python": sys.version,
-        "platform": platform.platform(),
-        "torch_version": torch.__version__,
-        "torch_cuda_version": torch.version.cuda,
-        "cuda_available": torch.cuda.is_available(),
-        "cuda_device_count": torch.cuda.device_count() if torch.cuda.is_available() else 0,
-        "cuda_devices": [
-            torch.cuda.get_device_name(i) for i in range(torch.cuda.device_count())
-        ] if torch.cuda.is_available() else [],
-        "packages": {
-            "fastvideo": package_version("fastvideo"),
-            "flash-attn": package_version("flash-attn"),
-            "flash-attn-cute": package_version("flash-attn-cute"),
-            "flashinfer-python": package_version("flashinfer-python"),
-            "nvidia-cutlass-dsl": package_version("nvidia-cutlass-dsl"),
-            "torch-c-dlpack-ext": package_version("torch-c-dlpack-ext"),
-            "quack-kernels": package_version("quack-kernels"),
-        },
-        "git": {
-            "worktree": str(Path(__file__).resolve().parents[3]),
-            "branch": run_git(["branch", "--show-current"]),
-            "head": run_git(["rev-parse", "HEAD"]),
-            "upstream_main": run_git(["rev-parse", "upstream/main"]),
-            "status_short": run_git(["status", "--short", "--branch"]),
-        },
-        "env": environment_snapshot(),
-        "argv": sys.argv,
-    }
-
-
 def build_profile_config(
     *,
     args: argparse.Namespace,
@@ -454,36 +342,25 @@ def build_profile_config(
     torch_compile_kwargs: dict[str, Any],
     pipeline_config: Any,
 ) -> dict[str, Any]:
-    height = args.height if args.height is not None else benchmark_entry.get("height", 1088)
-    width = args.width if args.width is not None else benchmark_entry.get("width", 1920)
     return {
-        "args": vars(args),
+        "tuned": {
+            "num_inference_steps": args.num_inference_steps,
+            "refine_num_inference_steps": args.refine_num_inference_steps,
+            "num_gpus": args.num_gpus,
+            "sp_size": args.num_gpus,
+            "fp4_linear": args.fp4_linear,
+            "compile_fullgraph": args.compile_fullgraph,
+        },
+        "fixed": fixed_settings(),
         "resolved": {
             "model_root": model_root,
             "refine_upsampler_path": str(refine_upsampler_path),
             "prompt": prompt,
-            "height": height,
-            "width": width,
-            "num_frames": args.num_frames,
-            "num_inference_steps": args.num_inference_steps,
-            "refine_num_inference_steps": args.refine_num_inference_steps,
-            "fps": args.fps,
-            "save_video": args.save_video,
-            "return_frames": args.return_frames,
-            "stage_logging_enabled": args.stage_logging,
-            "linear_fp4_enabled": args.fp4_linear,
-            "nvfp4_fa4_enabled": args.nvfp4_fa4,
-            "torch_compile_enabled": args.torch_compile,
+            "height": benchmark_entry.get("height", 1088),
+            "width": benchmark_entry.get("width", 1920),
             "torch_compile_kwargs": torch_compile_kwargs,
-            "sequence_parallel": {
-                "num_gpus": args.num_gpus,
-                "tp_size": args.tp_size,
-                "sp_size": args.sp_size,
-                "ulysses_sequence_parallel": args.sp_size > 1,
-            },
         },
         "pipeline_config": pipeline_config,
-        "runtime": runtime_snapshot(),
     }
 
 
@@ -503,42 +380,33 @@ def main() -> None:
         sys.stdout = Tee(original_stdout, log_file)
         sys.stderr = Tee(original_stderr, log_file)
         try:
-            configure_environment(args)
+            configure_environment()
             configure_inductor()
 
-            from fastvideo import VideoGenerator
-            from fastvideo.configs.pipelines.base import PipelineConfig
-            from fastvideo.layers.quantization.nvfp4_config import NVFP4Config
-            from fastvideo.utils import maybe_download_model
+            if not VALIDATION_JSON.exists():
+                raise FileNotFoundError(f"Validation file not found: {VALIDATION_JSON}")
 
-            if not args.validation_json.exists():
-                raise FileNotFoundError(f"Validation file not found: {args.validation_json}")
-
-            validation_entries = load_validation_entries(args.validation_json)
+            validation_entries = load_validation_entries(VALIDATION_JSON)
             if not validation_entries:
-                raise ValueError(f"No validation entries found in {args.validation_json}")
+                raise ValueError(f"No validation entries found in {VALIDATION_JSON}")
 
             benchmark_entry = validation_entries[0]
             prompt = benchmark_entry.get("caption")
             if not isinstance(prompt, str) or not prompt.strip():
                 raise ValueError("First validation entry is missing a usable caption")
 
-            avg_window = args.avg_window if args.avg_window is not None else args.num_runs - args.warmup_runs
-            measured_start_idx = max(args.warmup_runs, args.num_runs - avg_window)
+            measured_start_idx = WARMUP_RUNS
 
-            model_id = os.path.expandvars(os.path.expanduser(args.model_id))
-            model_root = maybe_download_model(model_id)
+            model_root = maybe_download_model(MODEL_ID)
             refine_upsampler_path = resolve_refine_upsampler_path(model_root)
             print(f"Profile run directory: {run_dir}")
             print(f"Using model root: {model_root}")
             print(f"Using refine upsampler: {refine_upsampler_path}")
             print(
-                "Parallel config: "
-                f"num_gpus={args.num_gpus}, tp_size={args.tp_size}, sp_size={args.sp_size}"
-            )
-            print(
-                "FP4 config: "
-                f"linear_fp4={args.fp4_linear}, nvfp4_fa4={args.nvfp4_fa4}"
+                "Sweep cell: "
+                f"steps={args.num_inference_steps}+{args.refine_num_inference_steps}, "
+                f"gpus/sp={args.num_gpus}, fp4_linear={args.fp4_linear}, "
+                f"fullgraph={args.compile_fullgraph}"
             )
 
             pipeline_config = PipelineConfig.from_pretrained(model_root)
@@ -559,27 +427,27 @@ def main() -> None:
             generator = VideoGenerator.from_pretrained(
                 model_root,
                 num_gpus=args.num_gpus,
-                tp_size=args.tp_size,
-                sp_size=args.sp_size,
-                distributed_executor_backend=args.distributed_executor_backend,
-                nvfp4_fa4=args.nvfp4_fa4,
+                tp_size=TP_SIZE,
+                sp_size=args.num_gpus,
+                distributed_executor_backend=DISTRIBUTED_EXECUTOR_BACKEND,
+                nvfp4_fa4=NVFP4_FA4,
                 ltx2_refine_enabled=True,
                 ltx2_refine_upsampler_path=str(refine_upsampler_path),
                 refine_lora_path="",
                 ltx2_refine_lora_path="",
                 ltx2_refine_num_inference_steps=args.refine_num_inference_steps,
-                ltx2_refine_guidance_scale=args.refine_guidance_scale,
-                ltx2_refine_add_noise=args.refine_add_noise,
+                ltx2_refine_guidance_scale=REFINE_GUIDANCE_SCALE,
+                ltx2_refine_add_noise=REFINE_ADD_NOISE,
                 pipeline_config=pipeline_config,
-                enable_torch_compile=args.torch_compile,
-                enable_torch_compile_text_encoder=args.torch_compile and args.compile_text_encoder,
-                enable_torch_compile_vae=args.torch_compile and args.compile_vae,
+                enable_torch_compile=TORCH_COMPILE,
+                enable_torch_compile_text_encoder=COMPILE_TEXT_ENCODER,
+                enable_torch_compile_vae=COMPILE_VAE,
                 torch_compile_kwargs=torch_compile_kwargs,
                 torch_compile_kwargs_vae=torch_compile_kwargs,
-                dit_cpu_offload=False,
-                text_encoder_cpu_offload=False,
-                vae_cpu_offload=False,
-                ltx2_vae_tiling=args.ltx2_vae_tiling,
+                dit_cpu_offload=DIT_CPU_OFFLOAD,
+                text_encoder_cpu_offload=TEXT_ENCODER_CPU_OFFLOAD,
+                vae_cpu_offload=VAE_CPU_OFFLOAD,
+                ltx2_vae_tiling=LTX2_VAE_TILING,
             )
 
             run_times: list[float] = []
@@ -591,32 +459,24 @@ def main() -> None:
             run_records: list[dict[str, Any]] = []
 
             try:
-                for i in range(args.num_runs):
+                for i in range(NUM_RUNS):
                     output_path = video_dir / f"output_ltx2_basic_t2v_run_{i + 1}.mp4"
-                    if output_path.exists():
-                        output_path.unlink()
-                        print(f"[{i + 1}/{args.num_runs}] Removed existing file: {output_path}")
-
-                    print(f"[{i + 1}/{args.num_runs}] Generating: {output_path}")
-                    if os.environ.get("FASTVIDEO_STAGE_LOGGING") == "0" and torch.cuda.is_available():
-                        torch.cuda.synchronize()
+                    print(f"[{i + 1}/{NUM_RUNS}] Generating: {output_path}")
 
                     start = time.perf_counter()
                     result = generator.generate_video(
                         prompt=prompt,
                         output_path=str(output_path),
-                        fps=args.fps,
-                        seed=args.seed,
-                        save_video=args.save_video,
-                        return_frames=args.return_frames,
-                        guidance_scale=args.guidance_scale,
-                        height=args.height if args.height is not None else benchmark_entry.get("height", 1088),
-                        width=args.width if args.width is not None else benchmark_entry.get("width", 1920),
-                        num_frames=args.num_frames,
+                        fps=FPS,
+                        seed=SEED,
+                        save_video=SAVE_VIDEO,
+                        return_frames=RETURN_FRAMES,
+                        guidance_scale=GUIDANCE_SCALE,
+                        height=benchmark_entry.get("height", 1088),
+                        width=benchmark_entry.get("width", 1920),
+                        num_frames=NUM_FRAMES,
                         num_inference_steps=args.num_inference_steps,
                     )
-                    if os.environ.get("FASTVIDEO_STAGE_LOGGING") == "0" and torch.cuda.is_available():
-                        torch.cuda.synchronize()
 
                     elapsed = result.get("generation_time") if isinstance(result, dict) else None
                     e2e_elapsed = result.get("e2e_latency") if isinstance(result, dict) else None
@@ -627,8 +487,8 @@ def main() -> None:
 
                     run_times.append(elapsed)
                     e2e_times.append(e2e_elapsed)
-                    print(f"[{i + 1}/{args.num_runs}] Generation time: {elapsed:.2f}s")
-                    print(f"[{i + 1}/{args.num_runs}] End-to-end latency: {e2e_elapsed:.2f}s")
+                    print(f"[{i + 1}/{NUM_RUNS}] Generation time: {elapsed:.2f}s")
+                    print(f"[{i + 1}/{NUM_RUNS}] End-to-end latency: {e2e_elapsed:.2f}s")
 
                     run_record: dict[str, Any] = {
                         "run_index": i + 1,
@@ -639,15 +499,14 @@ def main() -> None:
                     }
 
                     if isinstance(result, dict):
-                        per_stage_times = extract_stage_times(result)
-                        stage_sum = print_stage_breakdown(result, i + 1, args.num_runs)
-                        run_record["stage_times"] = per_stage_times
+                        stage_sum = print_stage_breakdown(result, i + 1, NUM_RUNS)
+                        run_record["stage_times"] = extract_stage_times(result)
                         if stage_sum is not None:
                             non_stage_overhead = e2e_elapsed - stage_sum
                             run_record["stage_sum"] = stage_sum
                             run_record["non_stage_overhead"] = non_stage_overhead
                             print(
-                                f"[{i + 1}/{args.num_runs}] Non-stage overhead "
+                                f"[{i + 1}/{NUM_RUNS}] Non-stage overhead "
                                 f"(e2e - stage sum): {non_stage_overhead:.3f}s"
                             )
                             if i >= measured_start_idx:
@@ -656,16 +515,12 @@ def main() -> None:
                         sr_forward_total, sr_stage_entries, stage_names = extract_sr_forward_latency(result)
                         run_record["sr_stage_entries"] = sr_stage_entries
                         if sr_forward_total is None:
-                            print(f"[{i + 1}/{args.num_runs}] SR forward latency unavailable")
+                            print(f"[{i + 1}/{NUM_RUNS}] SR forward latency unavailable")
                             if stage_names:
                                 print(f"    Available stage keys: {', '.join(stage_names)}")
-                                print(
-                                    "    Tip: set FASTVIDEO_SR_LATENCY_STAGE_SUBSTR="
-                                    "<substring> to match your SR stage key."
-                                )
                         else:
                             run_record["sr_forward_latency"] = sr_forward_total
-                            print(f"[{i + 1}/{args.num_runs}] SR forward latency: {sr_forward_total:.3f}s")
+                            print(f"[{i + 1}/{NUM_RUNS}] SR forward latency: {sr_forward_total:.3f}s")
                             for sr_stage_name, sr_exec_time in sr_stage_entries:
                                 print(f"    - {sr_stage_name}: {sr_exec_time:.3f}s")
                             if i >= measured_start_idx:
@@ -681,7 +536,7 @@ def main() -> None:
                 avg_time = sum(measured_times) / len(measured_times)
                 print(
                     f"Average video generation time over {len(measured_times)} runs "
-                    f"(runs {measured_start_idx + 1}-{len(run_times)}, skipping first {args.warmup_runs} warmup runs): "
+                    f"(runs {measured_start_idx + 1}-{len(run_times)}, skipping first {WARMUP_RUNS} warmup runs): "
                     f"{avg_time:.2f}s"
                 )
 
@@ -689,7 +544,7 @@ def main() -> None:
                 avg_e2e_time = sum(measured_e2e_times) / len(measured_e2e_times)
                 print(
                     f"Average end-to-end latency over {len(measured_e2e_times)} runs "
-                    f"(runs {measured_start_idx + 1}-{len(e2e_times)}, skipping first {args.warmup_runs} warmup runs): "
+                    f"(runs {measured_start_idx + 1}-{len(e2e_times)}, skipping first {WARMUP_RUNS} warmup runs): "
                     f"{avg_e2e_time:.2f}s"
                 )
 

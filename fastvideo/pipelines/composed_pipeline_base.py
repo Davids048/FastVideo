@@ -501,18 +501,11 @@ class ComposedPipelineBase(ABC):
         if not self.post_init_called:
             self.post_init()
 
-        with self.profiler_controller.region("profiler_region_inference_forward"):
-            # Execute each stage
-            logger.info("Running pipeline stages: %s", self._stage_name_mapping.keys())
-            # logger.info("Batch: %s", batch)
-            profile_stages = self.profiler_controller.has_profiler
-            for stage in self.stages:
-                if profile_stages:
-                    stage_key = getattr(stage, "_pipeline_stage_name", stage.__class__.__name__)
-                    with torch.profiler.record_function(f"fastvideo.stage::{stage_key}|{stage.__class__.__name__}"):
-                        batch = stage(batch, fastvideo_args)
-                else:
-                    batch = stage(batch, fastvideo_args)
+        # Execute each stage
+        logger.info("Running pipeline stages: %s", self._stage_name_mapping.keys())
+        # logger.info("Batch: %s", batch)
+        for stage in self.stages:
+            batch = stage(batch, fastvideo_args)
 
         # Return the output
         return batch
@@ -523,9 +516,6 @@ class ComposedPipelineBase(ABC):
     def close(self) -> None:
         detach_activation_trace(getattr(self, "_trace_mgr", None))
         self._trace_mgr = None
-        profiler_controller = getattr(self, "profiler_controller", None)
-        if profiler_controller is not None and profiler_controller.has_profiler:
-            profiler_controller.stop()
 
     def __del__(self):
         self.close()

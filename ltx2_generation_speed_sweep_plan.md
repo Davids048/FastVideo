@@ -57,7 +57,7 @@ Total planned runs:
 | Compile backend         | `inductor`                                                                                  |
 | Compile dynamic         | `false`                                                                                     |
 | Compile mode            | default / `None`                                                                            |
-| Code-path optimizations | none                                                                                        |
+| Benchmark-only optimizations | none                                                                                   |
 | Resolution              | `1920x1088`                                                                                 |
 | Frames                  | `121`                                                                                       |
 | Prompt                  | first validation prompt from `examples/training/finetune/ltx2/validation.json`              |
@@ -132,7 +132,7 @@ For each row:
 1. Confirm the output directory does not already exist.
 2. Set per-run cache directories under `/tmp/hal-jundas/`.
 3. Launch with `srun --overlap --jobid=4745 -N1 -n1 --gpus=<GPU/SP>`.
-4. Use the fixed flags below plus the row-specific flags.
+4. Use the script's fixed settings plus the row-specific flags below.
 5. Treat non-zero exit or missing `profile_summary.json` as a failed matrix cell.
 6. Do not change flags to make a failed cell pass; record the failure as that
    cell's result.
@@ -153,29 +153,7 @@ srun --overlap --jobid=4745 -N1 -n1 --gpus=<GPU/SP> bash -lc '
 
   /home/hal-jundas/venvs/fv-shared/bin/python \
     examples/inference/basic/basic_ltx2_distilled_fast_profile.py \
-    --profile-dir outputs_video/ltx2_generation_speed_sweep \
-    --run-name <run_name> \
     --num-gpus <GPU/SP> \
-    --sp-size <GPU/SP> \
-    --tp-size 1 \
-    --distributed-executor-backend mp \
-    --attention-backend FLASH_ATTN \
-    --num-runs 12 \
-    --warmup-runs 2 \
-    --seed 10 \
-    --num-frames 121 \
-    --guidance-scale 1.0 \
-    --refine-guidance-scale 1.0 \
-    --refine-add-noise \
-    --torch-compile \
-    --compile-text-encoder \
-    --compile-vae \
-    --compile-backend inductor \
-    --no-compile-dynamic \
-    --stage-logging \
-    --no-save-video \
-    --return-frames \
-    --no-nvfp4-fa4 \
     <steps flags> \
     <fp4 flags> \
     <fullgraph flags>
@@ -208,18 +186,24 @@ outputs_video/ltx2_generation_speed_sweep/<run_name>/profile.log
 For every successful run, verify `profile_config.json` records:
 
 ```text
-save_video=false
-return_frames=true
-stage_logging=true
-nvfp4_fa4=false
-torch_compile=true
-compile_text_encoder=true
-compile_vae=true
-compile_backend=inductor
-compile_dynamic=false
-tp_size=1
-num_frames=121
-seed=10
+fixed.save_video=false
+fixed.return_frames=true
+fixed.stage_logging=true
+fixed.nvfp4_fa4=false
+fixed.torch_compile=true
+fixed.compile_text_encoder=true
+fixed.compile_vae=true
+fixed.compile_backend=inductor
+fixed.compile_dynamic=false
+fixed.tp_size=1
+fixed.num_frames=121
+fixed.seed=10
+tuned.num_gpus=<GPU/SP>
+tuned.sp_size=<GPU/SP>
+tuned.num_inference_steps=<base steps>
+tuned.refine_num_inference_steps=<refine steps>
+tuned.fp4_linear=<row FP4 setting>
+tuned.compile_fullgraph=<row fullgraph setting>
 ```
 
 For each schedule/GPU/FP4/fullgraph cell, report:
