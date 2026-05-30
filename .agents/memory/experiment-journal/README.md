@@ -3,6 +3,30 @@
 Living log of all experiments. Each entry captures what was tried, the result,
 and any insights. Newest entries go at the top.
 
+## [2026-05-30] Experiment: ltx2-generation-speed-sweep
+
+- **Hypothesis**: With output and compile settings fixed, the reduced matrix will identify whether GPU/SP count, FP4 linear quantization, denoising schedule, or compile fullgraph is the actual latency driver for LTX-2 generation.
+- **Config**: model=FastVideo/LTX2-Distilled-Diffusers, lr=N/A, sp_size=1/2/4, gpus=1/2/4, script=examples/inference/basic/basic_ltx2_distilled_fast_profile.py, schedules=5+2 and 8+3, fp4_linear=false/true, compile_fullgraph=false/true, fixed=nvfp4_fa4=false, stage_logging=true, save_video=false, return_frames=true, compile_dit=true, compile_vae=true, compile_text_encoder=true, backend=inductor, dynamic=false, tp_size=1, attention_backend=FLASH_ATTN, num_runs=12, warmup_runs=2
+- **W&B run**: N/A
+- **Duration**: 2026-05-30 19:26-20:48 UTC on Slurm job 4745, node `hpc-rack-2-8`, using serial `srun --overlap --jobid=4745` cells.
+- **Key metrics**: 24/24 cells succeeded; best 5+2=`ltx2_speed_s5p2_g4_fp4off_fgoff` e2e=2.590s gen=2.490s sr=0.950s; best 8+3=`ltx2_speed_s8p3_g4_fp4off_fgoff` e2e=3.660s gen=3.566s sr=1.407s; no-FP4 4-GPU was fastest for both schedules; no MP4 files were written because `save_video=false`.
+- **Checkpoint**: N/A
+- **Insight**: No-FP4 scales best across 1/2/4 GPU SP for both schedules. FP4 helps single-GPU refine latency but hurts multi-GPU total latency because base denoising becomes slower. Fullgraph now runs successfully but is neutral to mildly negative for the fastest cells. SR latency is a subset of generation time, not an additional term to add after generation.
+- **Status**: completed
+- **Related lessons**: Detailed report and metrics artifact: `.agents/memory/experiment-journal/2026-05-30_ltx2_generation_speed_sweep.md`, `.agents/memory/experiment-journal/artifacts/2026-05-30_ltx2_generation_speed_sweep_results.json`
+
+## [2026-05-30] Experiment: ltx2-generation-speed-design-space-cleanup
+
+- **Hypothesis**: Reducing the LTX-2 speed matrix to denoising steps, GPUs/SP, FP4 linear, and fullgraph while fixing output and compile settings will make the next profiling pass comparable and easier to interpret.
+- **Config**: model=FastVideo/LTX2-Distilled-Diffusers, lr=N/A, sp_size=1/2/4, gpus=1/2/4, script=examples/inference/basic/basic_ltx2_distilled_fast_profile.py, tuning_dimensions=denoising_steps(5+2|8+3), gpus_sp(1|2|4), fp4_linear(false|true), compile_fullgraph(false|true); fixed=nvfp4_fa4=false, stage_logging=true, save_video=false, return_frames=true, compile_dit=true, compile_vae=true, compile_text_encoder=true, backend=inductor, dynamic=false, mode=default, tp_size=1
+- **W&B run**: N/A
+- **Duration**: Side-conversation cleanup pass on 2026-05-30; no model inference launched.
+- **Key metrics**: 22 deprecated non-tracing run directories moved under `outputs_video/deprecated runs/`; tracing/profiler outputs intentionally left in place.
+- **Checkpoint**: N/A
+- **Insight**: The active generation-speed design space is now four dimensions: denoising steps, GPUs/SP simplified to `1`, `2`, `4`, FP4 linear, and compile fullgraph. Historical incompatible runs remain available under the deprecated folder but should not be used as current-matrix measurements.
+- **Status**: completed
+- **Related lessons**: Current landing note: `.agents/memory/experiment-journal/2026-05-30_ltx2_generation_speed_design_space_cleanup.md`
+
 ## [2026-05-29] Experiment: ltx2-distilled-block47-gpu-profile
 
 - **Hypothesis**: A late transformer block will show whether the prior 8+3 stage split comes from SP communication overhead in low-res base denoising versus useful compute partitioning in high-res refine denoising.

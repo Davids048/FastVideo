@@ -1,0 +1,943 @@
+{
+  "best_by_schedule": {
+    "5+2": {
+      "avg_e2e_latency": 2.58971305815503,
+      "avg_sr_forward_latency": 0.950011340295896,
+      "avg_video_generation_time": 2.4895063614472748,
+      "run_name": "ltx2_speed_s5p2_g4_fp4off_fgoff"
+    },
+    "8+3": {
+      "avg_e2e_latency": 3.659577368339524,
+      "avg_sr_forward_latency": 1.4074678926728665,
+      "avg_video_generation_time": 3.5662845633924007,
+      "run_name": "ltx2_speed_s8p3_g4_fp4off_fgoff"
+    }
+  },
+  "date_utc": "2026-05-30",
+  "experiment": "ltx2-generation-speed-sweep",
+  "fixed_config": {
+    "attention_backend": "FLASH_ATTN",
+    "avg_window": null,
+    "compile_backend": "inductor",
+    "compile_dynamic": false,
+    "compile_mode": null,
+    "compile_text_encoder": true,
+    "compile_vae": true,
+    "distributed_executor_backend": "mp",
+    "guidance_scale": 1.0,
+    "height_width": "1920x1088 via script defaults/config",
+    "model_id": "FastVideo/LTX2-Distilled-Diffusers",
+    "num_frames": 121,
+    "num_runs": 12,
+    "nvfp4_fa4": false,
+    "prompt": "first validation prompt from examples/training/finetune/ltx2/validation.json",
+    "refine_add_noise": true,
+    "refine_guidance_scale": 1.0,
+    "return_frames": true,
+    "save_video": false,
+    "seed": 10,
+    "stage_logging": true,
+    "torch_compile": true,
+    "tp_size": 1,
+    "warmup_runs": 2
+  },
+  "output_root": "outputs_video/ltx2_generation_speed_sweep",
+  "results": [
+    {
+      "compile_fullgraph": false,
+      "fp4_linear": false,
+      "gpus": 1,
+      "measured_runs": 10,
+      "measured_start_run": 3,
+      "metrics_seconds": {
+        "PostDecodeFrameProcessStage": 0.09353000135160983,
+        "audio_decoding_stage": 0.020963458344340324,
+        "avg_e2e_latency": 4.489735369803384,
+        "avg_non_stage_overhead": 0.025603419076651333,
+        "avg_sr_forward_latency": 2.7344819978810846,
+        "avg_stage_sum": 4.464131950726733,
+        "avg_video_generation_time": 4.395556509681046,
+        "decoding_stage": 0.3295790774282068,
+        "denoising_stage": 1.244602196617052,
+        "ltx2_refine_denoising_stage": 2.6981700701173397,
+        "ltx2_upsample_stage": 0.036311927763745186,
+        "prompt_encoding_stage": 0.04063766007311642
+      },
+      "paths": {
+        "profile_config": "outputs_video/ltx2_generation_speed_sweep/ltx2_speed_s5p2_g1_fp4off_fgoff/profile_config.json",
+        "profile_log": "outputs_video/ltx2_generation_speed_sweep/ltx2_speed_s5p2_g1_fp4off_fgoff/profile.log",
+        "profile_runs_partial": "outputs_video/ltx2_generation_speed_sweep/ltx2_speed_s5p2_g1_fp4off_fgoff/profile_runs_partial.json",
+        "profile_summary": "outputs_video/ltx2_generation_speed_sweep/ltx2_speed_s5p2_g1_fp4off_fgoff/profile_summary.json",
+        "run_dir": "outputs_video/ltx2_generation_speed_sweep/ltx2_speed_s5p2_g1_fp4off_fgoff",
+        "videos_dir": "outputs_video/ltx2_generation_speed_sweep/ltx2_speed_s5p2_g1_fp4off_fgoff/videos"
+      },
+      "run_name": "ltx2_speed_s5p2_g1_fp4off_fgoff",
+      "sp_size": 1,
+      "steps": {
+        "base": 5,
+        "label": "5+2",
+        "refine": 2
+      },
+      "tp_size": 1
+    },
+    {
+      "compile_fullgraph": true,
+      "fp4_linear": false,
+      "gpus": 1,
+      "measured_runs": 10,
+      "measured_start_run": 3,
+      "metrics_seconds": {
+        "PostDecodeFrameProcessStage": 0.1056959331035614,
+        "audio_decoding_stage": 0.02094081505201757,
+        "avg_e2e_latency": 4.4980485392268745,
+        "avg_non_stage_overhead": 0.025906884903088213,
+        "avg_sr_forward_latency": 2.7322823914699255,
+        "avg_stage_sum": 4.472141654323786,
+        "avg_video_generation_time": 4.391762758838013,
+        "decoding_stage": 0.3306396986823529,
+        "denoising_stage": 1.2428523800335824,
+        "ltx2_refine_denoising_stage": 2.6957002269104122,
+        "ltx2_upsample_stage": 0.03658216455951333,
+        "prompt_encoding_stage": 0.039366451231762765
+      },
+      "paths": {
+        "profile_config": "outputs_video/ltx2_generation_speed_sweep/ltx2_speed_s5p2_g1_fp4off_fgon/profile_config.json",
+        "profile_log": "outputs_video/ltx2_generation_speed_sweep/ltx2_speed_s5p2_g1_fp4off_fgon/profile.log",
+        "profile_runs_partial": "outputs_video/ltx2_generation_speed_sweep/ltx2_speed_s5p2_g1_fp4off_fgon/profile_runs_partial.json",
+        "profile_summary": "outputs_video/ltx2_generation_speed_sweep/ltx2_speed_s5p2_g1_fp4off_fgon/profile_summary.json",
+        "run_dir": "outputs_video/ltx2_generation_speed_sweep/ltx2_speed_s5p2_g1_fp4off_fgon",
+        "videos_dir": "outputs_video/ltx2_generation_speed_sweep/ltx2_speed_s5p2_g1_fp4off_fgon/videos"
+      },
+      "run_name": "ltx2_speed_s5p2_g1_fp4off_fgon",
+      "sp_size": 1,
+      "steps": {
+        "base": 5,
+        "label": "5+2",
+        "refine": 2
+      },
+      "tp_size": 1
+    },
+    {
+      "compile_fullgraph": false,
+      "fp4_linear": true,
+      "gpus": 1,
+      "measured_runs": 10,
+      "measured_start_run": 3,
+      "metrics_seconds": {
+        "PostDecodeFrameProcessStage": 0.09310802868567407,
+        "audio_decoding_stage": 0.02205836889334023,
+        "avg_e2e_latency": 4.18768876446411,
+        "avg_non_stage_overhead": 0.02579523026943207,
+        "avg_sr_forward_latency": 2.0153965782374144,
+        "avg_stage_sum": 4.161893534194679,
+        "avg_video_generation_time": 4.093970107473433,
+        "decoding_stage": 0.3261965889018029,
+        "denoising_stage": 1.6642559861298651,
+        "ltx2_refine_denoising_stage": 1.9813901878427713,
+        "ltx2_upsample_stage": 0.03400639039464295,
+        "prompt_encoding_stage": 0.04052152195945382
+      },
+      "paths": {
+        "profile_config": "outputs_video/ltx2_generation_speed_sweep/ltx2_speed_s5p2_g1_fp4on_fgoff/profile_config.json",
+        "profile_log": "outputs_video/ltx2_generation_speed_sweep/ltx2_speed_s5p2_g1_fp4on_fgoff/profile.log",
+        "profile_runs_partial": "outputs_video/ltx2_generation_speed_sweep/ltx2_speed_s5p2_g1_fp4on_fgoff/profile_runs_partial.json",
+        "profile_summary": "outputs_video/ltx2_generation_speed_sweep/ltx2_speed_s5p2_g1_fp4on_fgoff/profile_summary.json",
+        "run_dir": "outputs_video/ltx2_generation_speed_sweep/ltx2_speed_s5p2_g1_fp4on_fgoff",
+        "videos_dir": "outputs_video/ltx2_generation_speed_sweep/ltx2_speed_s5p2_g1_fp4on_fgoff/videos"
+      },
+      "run_name": "ltx2_speed_s5p2_g1_fp4on_fgoff",
+      "sp_size": 1,
+      "steps": {
+        "base": 5,
+        "label": "5+2",
+        "refine": 2
+      },
+      "tp_size": 1
+    },
+    {
+      "compile_fullgraph": true,
+      "fp4_linear": true,
+      "gpus": 1,
+      "measured_runs": 10,
+      "measured_start_run": 3,
+      "metrics_seconds": {
+        "PostDecodeFrameProcessStage": 0.0972163939382881,
+        "audio_decoding_stage": 0.021636739559471607,
+        "avg_e2e_latency": 4.196362406946719,
+        "avg_non_stage_overhead": 0.025855527725070715,
+        "avg_sr_forward_latency": 2.0081507500261067,
+        "avg_stage_sum": 4.170506879221648,
+        "avg_video_generation_time": 4.098521781060844,
+        "decoding_stage": 0.33006610884331167,
+        "denoising_stage": 1.673675791779533,
+        "ltx2_refine_denoising_stage": 1.974139412632212,
+        "ltx2_upsample_stage": 0.034011337393894794,
+        "prompt_encoding_stage": 0.03939645425416529
+      },
+      "paths": {
+        "profile_config": "outputs_video/ltx2_generation_speed_sweep/ltx2_speed_s5p2_g1_fp4on_fgon/profile_config.json",
+        "profile_log": "outputs_video/ltx2_generation_speed_sweep/ltx2_speed_s5p2_g1_fp4on_fgon/profile.log",
+        "profile_runs_partial": "outputs_video/ltx2_generation_speed_sweep/ltx2_speed_s5p2_g1_fp4on_fgon/profile_runs_partial.json",
+        "profile_summary": "outputs_video/ltx2_generation_speed_sweep/ltx2_speed_s5p2_g1_fp4on_fgon/profile_summary.json",
+        "run_dir": "outputs_video/ltx2_generation_speed_sweep/ltx2_speed_s5p2_g1_fp4on_fgon",
+        "videos_dir": "outputs_video/ltx2_generation_speed_sweep/ltx2_speed_s5p2_g1_fp4on_fgon/videos"
+      },
+      "run_name": "ltx2_speed_s5p2_g1_fp4on_fgon",
+      "sp_size": 1,
+      "steps": {
+        "base": 5,
+        "label": "5+2",
+        "refine": 2
+      },
+      "tp_size": 1
+    },
+    {
+      "compile_fullgraph": false,
+      "fp4_linear": false,
+      "gpus": 2,
+      "measured_runs": 10,
+      "measured_start_run": 3,
+      "metrics_seconds": {
+        "PostDecodeFrameProcessStage": 0.09621340036392212,
+        "audio_decoding_stage": 0.02168478099629283,
+        "avg_e2e_latency": 3.262533421255648,
+        "avg_non_stage_overhead": 0.03448522943072021,
+        "avg_sr_forward_latency": 1.6549099863041192,
+        "avg_stage_sum": 3.228048191824928,
+        "avg_video_generation_time": 3.1657268231734634,
+        "decoding_stage": 0.3405139316804707,
+        "denoising_stage": 1.0717937375418842,
+        "ltx2_refine_denoising_stage": 1.6208999128080905,
+        "ltx2_upsample_stage": 0.03401007349602878,
+        "prompt_encoding_stage": 0.04262665482237935
+      },
+      "paths": {
+        "profile_config": "outputs_video/ltx2_generation_speed_sweep/ltx2_speed_s5p2_g2_fp4off_fgoff/profile_config.json",
+        "profile_log": "outputs_video/ltx2_generation_speed_sweep/ltx2_speed_s5p2_g2_fp4off_fgoff/profile.log",
+        "profile_runs_partial": "outputs_video/ltx2_generation_speed_sweep/ltx2_speed_s5p2_g2_fp4off_fgoff/profile_runs_partial.json",
+        "profile_summary": "outputs_video/ltx2_generation_speed_sweep/ltx2_speed_s5p2_g2_fp4off_fgoff/profile_summary.json",
+        "run_dir": "outputs_video/ltx2_generation_speed_sweep/ltx2_speed_s5p2_g2_fp4off_fgoff",
+        "videos_dir": "outputs_video/ltx2_generation_speed_sweep/ltx2_speed_s5p2_g2_fp4off_fgoff/videos"
+      },
+      "run_name": "ltx2_speed_s5p2_g2_fp4off_fgoff",
+      "sp_size": 2,
+      "steps": {
+        "base": 5,
+        "label": "5+2",
+        "refine": 2
+      },
+      "tp_size": 1
+    },
+    {
+      "compile_fullgraph": true,
+      "fp4_linear": false,
+      "gpus": 2,
+      "measured_runs": 10,
+      "measured_start_run": 3,
+      "metrics_seconds": {
+        "PostDecodeFrameProcessStage": 0.09790861271321774,
+        "audio_decoding_stage": 0.02126804427243769,
+        "avg_e2e_latency": 3.257997122220695,
+        "avg_non_stage_overhead": 0.030739380279555917,
+        "avg_sr_forward_latency": 1.6564783233217895,
+        "avg_stage_sum": 3.227257741941139,
+        "avg_video_generation_time": 3.159560818783939,
+        "decoding_stage": 0.33681776486337184,
+        "denoising_stage": 1.072913495125249,
+        "ltx2_refine_denoising_stage": 1.6225389478262513,
+        "ltx2_upsample_stage": 0.03393937549553812,
+        "prompt_encoding_stage": 0.041562560480087996
+      },
+      "paths": {
+        "profile_config": "outputs_video/ltx2_generation_speed_sweep/ltx2_speed_s5p2_g2_fp4off_fgon/profile_config.json",
+        "profile_log": "outputs_video/ltx2_generation_speed_sweep/ltx2_speed_s5p2_g2_fp4off_fgon/profile.log",
+        "profile_runs_partial": "outputs_video/ltx2_generation_speed_sweep/ltx2_speed_s5p2_g2_fp4off_fgon/profile_runs_partial.json",
+        "profile_summary": "outputs_video/ltx2_generation_speed_sweep/ltx2_speed_s5p2_g2_fp4off_fgon/profile_summary.json",
+        "run_dir": "outputs_video/ltx2_generation_speed_sweep/ltx2_speed_s5p2_g2_fp4off_fgon",
+        "videos_dir": "outputs_video/ltx2_generation_speed_sweep/ltx2_speed_s5p2_g2_fp4off_fgon/videos"
+      },
+      "run_name": "ltx2_speed_s5p2_g2_fp4off_fgon",
+      "sp_size": 2,
+      "steps": {
+        "base": 5,
+        "label": "5+2",
+        "refine": 2
+      },
+      "tp_size": 1
+    },
+    {
+      "compile_fullgraph": false,
+      "fp4_linear": true,
+      "gpus": 2,
+      "measured_runs": 10,
+      "measured_start_run": 3,
+      "metrics_seconds": {
+        "PostDecodeFrameProcessStage": 0.09367529144510627,
+        "audio_decoding_stage": 0.022269049333408474,
+        "avg_e2e_latency": 3.822787717869505,
+        "avg_non_stage_overhead": 0.029768099961802363,
+        "avg_sr_forward_latency": 1.2921060499269514,
+        "avg_stage_sum": 3.7930196179077034,
+        "avg_video_generation_time": 3.72848975979723,
+        "decoding_stage": 0.33635127493180333,
+        "denoising_stage": 2.006098390929401,
+        "ltx2_refine_denoising_stage": 1.2577175084035843,
+        "ltx2_upsample_stage": 0.034388541523367164,
+        "prompt_encoding_stage": 0.042194248642772436
+      },
+      "paths": {
+        "profile_config": "outputs_video/ltx2_generation_speed_sweep/ltx2_speed_s5p2_g2_fp4on_fgoff/profile_config.json",
+        "profile_log": "outputs_video/ltx2_generation_speed_sweep/ltx2_speed_s5p2_g2_fp4on_fgoff/profile.log",
+        "profile_runs_partial": "outputs_video/ltx2_generation_speed_sweep/ltx2_speed_s5p2_g2_fp4on_fgoff/profile_runs_partial.json",
+        "profile_summary": "outputs_video/ltx2_generation_speed_sweep/ltx2_speed_s5p2_g2_fp4on_fgoff/profile_summary.json",
+        "run_dir": "outputs_video/ltx2_generation_speed_sweep/ltx2_speed_s5p2_g2_fp4on_fgoff",
+        "videos_dir": "outputs_video/ltx2_generation_speed_sweep/ltx2_speed_s5p2_g2_fp4on_fgoff/videos"
+      },
+      "run_name": "ltx2_speed_s5p2_g2_fp4on_fgoff",
+      "sp_size": 2,
+      "steps": {
+        "base": 5,
+        "label": "5+2",
+        "refine": 2
+      },
+      "tp_size": 1
+    },
+    {
+      "compile_fullgraph": true,
+      "fp4_linear": true,
+      "gpus": 2,
+      "measured_runs": 10,
+      "measured_start_run": 3,
+      "metrics_seconds": {
+        "PostDecodeFrameProcessStage": 0.10298983324319125,
+        "audio_decoding_stage": 0.023356860876083373,
+        "avg_e2e_latency": 3.9484838201664387,
+        "avg_non_stage_overhead": 0.037733516888692975,
+        "avg_sr_forward_latency": 1.298525927402079,
+        "avg_stage_sum": 3.9107503032777458,
+        "avg_video_generation_time": 3.844873682036996,
+        "decoding_stage": 0.3328943742904812,
+        "denoising_stage": 2.111442185100168,
+        "ltx2_refine_denoising_stage": 1.2642579875420779,
+        "ltx2_upsample_stage": 0.034267939860001206,
+        "prompt_encoding_stage": 0.04121777131222189
+      },
+      "paths": {
+        "profile_config": "outputs_video/ltx2_generation_speed_sweep/ltx2_speed_s5p2_g2_fp4on_fgon/profile_config.json",
+        "profile_log": "outputs_video/ltx2_generation_speed_sweep/ltx2_speed_s5p2_g2_fp4on_fgon/profile.log",
+        "profile_runs_partial": "outputs_video/ltx2_generation_speed_sweep/ltx2_speed_s5p2_g2_fp4on_fgon/profile_runs_partial.json",
+        "profile_summary": "outputs_video/ltx2_generation_speed_sweep/ltx2_speed_s5p2_g2_fp4on_fgon/profile_summary.json",
+        "run_dir": "outputs_video/ltx2_generation_speed_sweep/ltx2_speed_s5p2_g2_fp4on_fgon",
+        "videos_dir": "outputs_video/ltx2_generation_speed_sweep/ltx2_speed_s5p2_g2_fp4on_fgon/videos"
+      },
+      "run_name": "ltx2_speed_s5p2_g2_fp4on_fgon",
+      "sp_size": 2,
+      "steps": {
+        "base": 5,
+        "label": "5+2",
+        "refine": 2
+      },
+      "tp_size": 1
+    },
+    {
+      "compile_fullgraph": false,
+      "fp4_linear": false,
+      "gpus": 4,
+      "measured_runs": 10,
+      "measured_start_run": 3,
+      "metrics_seconds": {
+        "PostDecodeFrameProcessStage": 0.09959925869479776,
+        "audio_decoding_stage": 0.021176983881741763,
+        "avg_e2e_latency": 2.58971305815503,
+        "avg_non_stage_overhead": 0.03418390126898885,
+        "avg_sr_forward_latency": 0.950011340295896,
+        "avg_stage_sum": 2.555529156886041,
+        "avg_video_generation_time": 2.4895063614472748,
+        "decoding_stage": 0.3339461169205606,
+        "denoising_stage": 1.1076798526570202,
+        "ltx2_refine_denoising_stage": 0.9156946652103215,
+        "ltx2_upsample_stage": 0.034316675085574386,
+        "prompt_encoding_stage": 0.042794727021828294
+      },
+      "paths": {
+        "profile_config": "outputs_video/ltx2_generation_speed_sweep/ltx2_speed_s5p2_g4_fp4off_fgoff/profile_config.json",
+        "profile_log": "outputs_video/ltx2_generation_speed_sweep/ltx2_speed_s5p2_g4_fp4off_fgoff/profile.log",
+        "profile_runs_partial": "outputs_video/ltx2_generation_speed_sweep/ltx2_speed_s5p2_g4_fp4off_fgoff/profile_runs_partial.json",
+        "profile_summary": "outputs_video/ltx2_generation_speed_sweep/ltx2_speed_s5p2_g4_fp4off_fgoff/profile_summary.json",
+        "run_dir": "outputs_video/ltx2_generation_speed_sweep/ltx2_speed_s5p2_g4_fp4off_fgoff",
+        "videos_dir": "outputs_video/ltx2_generation_speed_sweep/ltx2_speed_s5p2_g4_fp4off_fgoff/videos"
+      },
+      "run_name": "ltx2_speed_s5p2_g4_fp4off_fgoff",
+      "sp_size": 4,
+      "steps": {
+        "base": 5,
+        "label": "5+2",
+        "refine": 2
+      },
+      "tp_size": 1
+    },
+    {
+      "compile_fullgraph": true,
+      "fp4_linear": false,
+      "gpus": 4,
+      "measured_runs": 10,
+      "measured_start_run": 3,
+      "metrics_seconds": {
+        "PostDecodeFrameProcessStage": 0.0944712228141725,
+        "audio_decoding_stage": 0.021458543417975307,
+        "avg_e2e_latency": 2.608080980554223,
+        "avg_non_stage_overhead": 0.03226921483874321,
+        "avg_sr_forward_latency": 0.9475098800379783,
+        "avg_stage_sum": 2.5758117657154798,
+        "avg_video_generation_time": 2.5130068896804003,
+        "decoding_stage": 0.337778012920171,
+        "denoising_stage": 1.1331988452933728,
+        "ltx2_refine_denoising_stage": 0.9131813379004597,
+        "ltx2_upsample_stage": 0.03432854213751853,
+        "prompt_encoding_stage": 0.04107585214078426
+      },
+      "paths": {
+        "profile_config": "outputs_video/ltx2_generation_speed_sweep/ltx2_speed_s5p2_g4_fp4off_fgon/profile_config.json",
+        "profile_log": "outputs_video/ltx2_generation_speed_sweep/ltx2_speed_s5p2_g4_fp4off_fgon/profile.log",
+        "profile_runs_partial": "outputs_video/ltx2_generation_speed_sweep/ltx2_speed_s5p2_g4_fp4off_fgon/profile_runs_partial.json",
+        "profile_summary": "outputs_video/ltx2_generation_speed_sweep/ltx2_speed_s5p2_g4_fp4off_fgon/profile_summary.json",
+        "run_dir": "outputs_video/ltx2_generation_speed_sweep/ltx2_speed_s5p2_g4_fp4off_fgon",
+        "videos_dir": "outputs_video/ltx2_generation_speed_sweep/ltx2_speed_s5p2_g4_fp4off_fgon/videos"
+      },
+      "run_name": "ltx2_speed_s5p2_g4_fp4off_fgon",
+      "sp_size": 4,
+      "steps": {
+        "base": 5,
+        "label": "5+2",
+        "refine": 2
+      },
+      "tp_size": 1
+    },
+    {
+      "compile_fullgraph": false,
+      "fp4_linear": true,
+      "gpus": 4,
+      "measured_runs": 10,
+      "measured_start_run": 3,
+      "metrics_seconds": {
+        "PostDecodeFrameProcessStage": 0.10031855078414083,
+        "audio_decoding_stage": 0.02150882934220135,
+        "avg_e2e_latency": 3.5842248246539383,
+        "avg_non_stage_overhead": 0.032541539147496225,
+        "avg_sr_forward_latency": 1.0944770422764123,
+        "avg_stage_sum": 3.551683285506442,
+        "avg_video_generation_time": 3.4832957865670324,
+        "decoding_stage": 0.33593355379998685,
+        "denoising_stage": 1.9569916609674691,
+        "ltx2_refine_denoising_stage": 1.0597216311376543,
+        "ltx2_upsample_stage": 0.03475541113875806,
+        "prompt_encoding_stage": 0.04212855980731547
+      },
+      "paths": {
+        "profile_config": "outputs_video/ltx2_generation_speed_sweep/ltx2_speed_s5p2_g4_fp4on_fgoff/profile_config.json",
+        "profile_log": "outputs_video/ltx2_generation_speed_sweep/ltx2_speed_s5p2_g4_fp4on_fgoff/profile.log",
+        "profile_runs_partial": "outputs_video/ltx2_generation_speed_sweep/ltx2_speed_s5p2_g4_fp4on_fgoff/profile_runs_partial.json",
+        "profile_summary": "outputs_video/ltx2_generation_speed_sweep/ltx2_speed_s5p2_g4_fp4on_fgoff/profile_summary.json",
+        "run_dir": "outputs_video/ltx2_generation_speed_sweep/ltx2_speed_s5p2_g4_fp4on_fgoff",
+        "videos_dir": "outputs_video/ltx2_generation_speed_sweep/ltx2_speed_s5p2_g4_fp4on_fgoff/videos"
+      },
+      "run_name": "ltx2_speed_s5p2_g4_fp4on_fgoff",
+      "sp_size": 4,
+      "steps": {
+        "base": 5,
+        "label": "5+2",
+        "refine": 2
+      },
+      "tp_size": 1
+    },
+    {
+      "compile_fullgraph": true,
+      "fp4_linear": true,
+      "gpus": 4,
+      "measured_runs": 10,
+      "measured_start_run": 3,
+      "metrics_seconds": {
+        "PostDecodeFrameProcessStage": 0.10697758505120873,
+        "audio_decoding_stage": 0.022034376161172986,
+        "avg_e2e_latency": 3.7041624932549895,
+        "avg_non_stage_overhead": 0.036090378230437634,
+        "avg_sr_forward_latency": 1.1213492565322667,
+        "avg_stage_sum": 3.6680721150245517,
+        "avg_video_generation_time": 3.59656343809329,
+        "decoding_stage": 0.3358507772441953,
+        "denoising_stage": 2.0404823190532624,
+        "ltx2_refine_denoising_stage": 1.086607354786247,
+        "ltx2_upsample_stage": 0.034741901746019724,
+        "prompt_encoding_stage": 0.04106605001725257
+      },
+      "paths": {
+        "profile_config": "outputs_video/ltx2_generation_speed_sweep/ltx2_speed_s5p2_g4_fp4on_fgon/profile_config.json",
+        "profile_log": "outputs_video/ltx2_generation_speed_sweep/ltx2_speed_s5p2_g4_fp4on_fgon/profile.log",
+        "profile_runs_partial": "outputs_video/ltx2_generation_speed_sweep/ltx2_speed_s5p2_g4_fp4on_fgon/profile_runs_partial.json",
+        "profile_summary": "outputs_video/ltx2_generation_speed_sweep/ltx2_speed_s5p2_g4_fp4on_fgon/profile_summary.json",
+        "run_dir": "outputs_video/ltx2_generation_speed_sweep/ltx2_speed_s5p2_g4_fp4on_fgon",
+        "videos_dir": "outputs_video/ltx2_generation_speed_sweep/ltx2_speed_s5p2_g4_fp4on_fgon/videos"
+      },
+      "run_name": "ltx2_speed_s5p2_g4_fp4on_fgon",
+      "sp_size": 4,
+      "steps": {
+        "base": 5,
+        "label": "5+2",
+        "refine": 2
+      },
+      "tp_size": 1
+    },
+    {
+      "compile_fullgraph": false,
+      "fp4_linear": false,
+      "gpus": 1,
+      "measured_runs": 10,
+      "measured_start_run": 3,
+      "metrics_seconds": {
+        "PostDecodeFrameProcessStage": 0.09302566549740732,
+        "audio_decoding_stage": 0.019848693115636706,
+        "avg_e2e_latency": 6.589130342612043,
+        "avg_non_stage_overhead": 0.025549441948533057,
+        "avg_sr_forward_latency": 4.086710793664679,
+        "avg_stage_sum": 6.563580900663509,
+        "avg_video_generation_time": 6.495487303333357,
+        "decoding_stage": 0.3296148103661835,
+        "denoising_stage": 1.9939017620868982,
+        "ltx2_refine_denoising_stage": 4.050129067525267,
+        "ltx2_upsample_stage": 0.03658172613941133,
+        "prompt_encoding_stage": 0.04014519462361932
+      },
+      "paths": {
+        "profile_config": "outputs_video/ltx2_generation_speed_sweep/ltx2_speed_s8p3_g1_fp4off_fgoff/profile_config.json",
+        "profile_log": "outputs_video/ltx2_generation_speed_sweep/ltx2_speed_s8p3_g1_fp4off_fgoff/profile.log",
+        "profile_runs_partial": "outputs_video/ltx2_generation_speed_sweep/ltx2_speed_s8p3_g1_fp4off_fgoff/profile_runs_partial.json",
+        "profile_summary": "outputs_video/ltx2_generation_speed_sweep/ltx2_speed_s8p3_g1_fp4off_fgoff/profile_summary.json",
+        "run_dir": "outputs_video/ltx2_generation_speed_sweep/ltx2_speed_s8p3_g1_fp4off_fgoff",
+        "videos_dir": "outputs_video/ltx2_generation_speed_sweep/ltx2_speed_s8p3_g1_fp4off_fgoff/videos"
+      },
+      "run_name": "ltx2_speed_s8p3_g1_fp4off_fgoff",
+      "sp_size": 1,
+      "steps": {
+        "base": 8,
+        "label": "8+3",
+        "refine": 3
+      },
+      "tp_size": 1
+    },
+    {
+      "compile_fullgraph": true,
+      "fp4_linear": false,
+      "gpus": 1,
+      "measured_runs": 10,
+      "measured_start_run": 3,
+      "metrics_seconds": {
+        "PostDecodeFrameProcessStage": 0.09757850305177271,
+        "audio_decoding_stage": 0.020463382126763463,
+        "avg_e2e_latency": 6.588050548452884,
+        "avg_non_stage_overhead": 0.026526551134884356,
+        "avg_sr_forward_latency": 4.089784487616271,
+        "avg_stage_sum": 6.561523997318001,
+        "avg_video_generation_time": 6.489839602913707,
+        "decoding_stage": 0.3295198535080999,
+        "denoising_stage": 1.984465674404055,
+        "ltx2_refine_denoising_stage": 4.053527455963194,
+        "ltx2_upsample_stage": 0.03625703165307641,
+        "prompt_encoding_stage": 0.03934245160780847
+      },
+      "paths": {
+        "profile_config": "outputs_video/ltx2_generation_speed_sweep/ltx2_speed_s8p3_g1_fp4off_fgon/profile_config.json",
+        "profile_log": "outputs_video/ltx2_generation_speed_sweep/ltx2_speed_s8p3_g1_fp4off_fgon/profile.log",
+        "profile_runs_partial": "outputs_video/ltx2_generation_speed_sweep/ltx2_speed_s8p3_g1_fp4off_fgon/profile_runs_partial.json",
+        "profile_summary": "outputs_video/ltx2_generation_speed_sweep/ltx2_speed_s8p3_g1_fp4off_fgon/profile_summary.json",
+        "run_dir": "outputs_video/ltx2_generation_speed_sweep/ltx2_speed_s8p3_g1_fp4off_fgon",
+        "videos_dir": "outputs_video/ltx2_generation_speed_sweep/ltx2_speed_s8p3_g1_fp4off_fgon/videos"
+      },
+      "run_name": "ltx2_speed_s8p3_g1_fp4off_fgon",
+      "sp_size": 1,
+      "steps": {
+        "base": 8,
+        "label": "8+3",
+        "refine": 3
+      },
+      "tp_size": 1
+    },
+    {
+      "compile_fullgraph": false,
+      "fp4_linear": true,
+      "gpus": 1,
+      "measured_runs": 10,
+      "measured_start_run": 3,
+      "metrics_seconds": {
+        "PostDecodeFrameProcessStage": 0.10299798478372395,
+        "audio_decoding_stage": 0.021496648155152797,
+        "avg_e2e_latency": 6.007470687292516,
+        "avg_non_stage_overhead": 0.025806991988793014,
+        "avg_sr_forward_latency": 2.9957372145261614,
+        "avg_stage_sum": 5.981663695303722,
+        "avg_video_generation_time": 5.903871101373807,
+        "decoding_stage": 0.327592780534178,
+        "denoising_stage": 2.4932125016115605,
+        "ltx2_refine_denoising_stage": 2.961868807533756,
+        "ltx2_upsample_stage": 0.033868406992405654,
+        "prompt_encoding_stage": 0.04027373963035643
+      },
+      "paths": {
+        "profile_config": "outputs_video/ltx2_generation_speed_sweep/ltx2_speed_s8p3_g1_fp4on_fgoff/profile_config.json",
+        "profile_log": "outputs_video/ltx2_generation_speed_sweep/ltx2_speed_s8p3_g1_fp4on_fgoff/profile.log",
+        "profile_runs_partial": "outputs_video/ltx2_generation_speed_sweep/ltx2_speed_s8p3_g1_fp4on_fgoff/profile_runs_partial.json",
+        "profile_summary": "outputs_video/ltx2_generation_speed_sweep/ltx2_speed_s8p3_g1_fp4on_fgoff/profile_summary.json",
+        "run_dir": "outputs_video/ltx2_generation_speed_sweep/ltx2_speed_s8p3_g1_fp4on_fgoff",
+        "videos_dir": "outputs_video/ltx2_generation_speed_sweep/ltx2_speed_s8p3_g1_fp4on_fgoff/videos"
+      },
+      "run_name": "ltx2_speed_s8p3_g1_fp4on_fgoff",
+      "sp_size": 1,
+      "steps": {
+        "base": 8,
+        "label": "8+3",
+        "refine": 3
+      },
+      "tp_size": 1
+    },
+    {
+      "compile_fullgraph": true,
+      "fp4_linear": true,
+      "gpus": 1,
+      "measured_runs": 10,
+      "measured_start_run": 3,
+      "metrics_seconds": {
+        "PostDecodeFrameProcessStage": 0.0957222222816199,
+        "audio_decoding_stage": 0.021197588508948685,
+        "avg_e2e_latency": 5.937820734223351,
+        "avg_non_stage_overhead": 0.0257519714999944,
+        "avg_sr_forward_latency": 2.988930092845112,
+        "avg_stage_sum": 5.912068762723356,
+        "avg_video_generation_time": 5.8414556018076835,
+        "decoding_stage": 0.3274277159478515,
+        "denoising_stage": 2.438792805606499,
+        "ltx2_refine_denoising_stage": 2.955008226400241,
+        "ltx2_upsample_stage": 0.03392186644487083,
+        "prompt_encoding_stage": 0.039658785052597526
+      },
+      "paths": {
+        "profile_config": "outputs_video/ltx2_generation_speed_sweep/ltx2_speed_s8p3_g1_fp4on_fgon/profile_config.json",
+        "profile_log": "outputs_video/ltx2_generation_speed_sweep/ltx2_speed_s8p3_g1_fp4on_fgon/profile.log",
+        "profile_runs_partial": "outputs_video/ltx2_generation_speed_sweep/ltx2_speed_s8p3_g1_fp4on_fgon/profile_runs_partial.json",
+        "profile_summary": "outputs_video/ltx2_generation_speed_sweep/ltx2_speed_s8p3_g1_fp4on_fgon/profile_summary.json",
+        "run_dir": "outputs_video/ltx2_generation_speed_sweep/ltx2_speed_s8p3_g1_fp4on_fgon",
+        "videos_dir": "outputs_video/ltx2_generation_speed_sweep/ltx2_speed_s8p3_g1_fp4on_fgon/videos"
+      },
+      "run_name": "ltx2_speed_s8p3_g1_fp4on_fgon",
+      "sp_size": 1,
+      "steps": {
+        "base": 8,
+        "label": "8+3",
+        "refine": 3
+      },
+      "tp_size": 1
+    },
+    {
+      "compile_fullgraph": false,
+      "fp4_linear": false,
+      "gpus": 2,
+      "measured_runs": 10,
+      "measured_start_run": 3,
+      "metrics_seconds": {
+        "PostDecodeFrameProcessStage": 0.09480476872995496,
+        "audio_decoding_stage": 0.023110747849568725,
+        "avg_e2e_latency": 4.800478226039559,
+        "avg_non_stage_overhead": 0.02907226588577032,
+        "avg_sr_forward_latency": 2.4719668064266442,
+        "avg_stage_sum": 4.771405960153789,
+        "avg_video_generation_time": 4.7050331115722654,
+        "decoding_stage": 0.33858430990949273,
+        "denoising_stage": 1.8000882386695594,
+        "ltx2_refine_denoising_stage": 2.437958180718124,
+        "ltx2_upsample_stage": 0.03400862570852041,
+        "prompt_encoding_stage": 0.042536320397630334
+      },
+      "paths": {
+        "profile_config": "outputs_video/ltx2_generation_speed_sweep/ltx2_speed_s8p3_g2_fp4off_fgoff/profile_config.json",
+        "profile_log": "outputs_video/ltx2_generation_speed_sweep/ltx2_speed_s8p3_g2_fp4off_fgoff/profile.log",
+        "profile_runs_partial": "outputs_video/ltx2_generation_speed_sweep/ltx2_speed_s8p3_g2_fp4off_fgoff/profile_runs_partial.json",
+        "profile_summary": "outputs_video/ltx2_generation_speed_sweep/ltx2_speed_s8p3_g2_fp4off_fgoff/profile_summary.json",
+        "run_dir": "outputs_video/ltx2_generation_speed_sweep/ltx2_speed_s8p3_g2_fp4off_fgoff",
+        "videos_dir": "outputs_video/ltx2_generation_speed_sweep/ltx2_speed_s8p3_g2_fp4off_fgoff/videos"
+      },
+      "run_name": "ltx2_speed_s8p3_g2_fp4off_fgoff",
+      "sp_size": 2,
+      "steps": {
+        "base": 8,
+        "label": "8+3",
+        "refine": 3
+      },
+      "tp_size": 1
+    },
+    {
+      "compile_fullgraph": true,
+      "fp4_linear": false,
+      "gpus": 2,
+      "measured_runs": 10,
+      "measured_start_run": 3,
+      "metrics_seconds": {
+        "PostDecodeFrameProcessStage": 0.09202694785781204,
+        "audio_decoding_stage": 0.02220482430420816,
+        "avg_e2e_latency": 4.777241170499474,
+        "avg_non_stage_overhead": 0.029709325497969986,
+        "avg_sr_forward_latency": 2.4723947660066186,
+        "avg_stage_sum": 4.747531845001504,
+        "avg_video_generation_time": 4.684597892034799,
+        "decoding_stage": 0.33996510463766755,
+        "denoising_stage": 1.7793967376928777,
+        "ltx2_refine_denoising_stage": 2.4384130346123127,
+        "ltx2_upsample_stage": 0.033981731394305825,
+        "prompt_encoding_stage": 0.0412299825809896
+      },
+      "paths": {
+        "profile_config": "outputs_video/ltx2_generation_speed_sweep/ltx2_speed_s8p3_g2_fp4off_fgon/profile_config.json",
+        "profile_log": "outputs_video/ltx2_generation_speed_sweep/ltx2_speed_s8p3_g2_fp4off_fgon/profile.log",
+        "profile_runs_partial": "outputs_video/ltx2_generation_speed_sweep/ltx2_speed_s8p3_g2_fp4off_fgon/profile_runs_partial.json",
+        "profile_summary": "outputs_video/ltx2_generation_speed_sweep/ltx2_speed_s8p3_g2_fp4off_fgon/profile_summary.json",
+        "run_dir": "outputs_video/ltx2_generation_speed_sweep/ltx2_speed_s8p3_g2_fp4off_fgon",
+        "videos_dir": "outputs_video/ltx2_generation_speed_sweep/ltx2_speed_s8p3_g2_fp4off_fgon/videos"
+      },
+      "run_name": "ltx2_speed_s8p3_g2_fp4off_fgon",
+      "sp_size": 2,
+      "steps": {
+        "base": 8,
+        "label": "8+3",
+        "refine": 3
+      },
+      "tp_size": 1
+    },
+    {
+      "compile_fullgraph": false,
+      "fp4_linear": true,
+      "gpus": 2,
+      "measured_runs": 10,
+      "measured_start_run": 3,
+      "metrics_seconds": {
+        "PostDecodeFrameProcessStage": 0.10054220631718636,
+        "audio_decoding_stage": 0.023653856478631496,
+        "avg_e2e_latency": 5.630640743160621,
+        "avg_non_stage_overhead": 0.03616319964639843,
+        "avg_sr_forward_latency": 1.9244406464044004,
+        "avg_stage_sum": 5.5944775435142216,
+        "avg_video_generation_time": 5.529491512384266,
+        "decoding_stage": 0.33772353352978823,
+        "denoising_stage": 3.1654952728189527,
+        "ltx2_refine_denoising_stage": 1.8901018515694887,
+        "ltx2_upsample_stage": 0.034338794834911826,
+        "prompt_encoding_stage": 0.04230138775892556
+      },
+      "paths": {
+        "profile_config": "outputs_video/ltx2_generation_speed_sweep/ltx2_speed_s8p3_g2_fp4on_fgoff/profile_config.json",
+        "profile_log": "outputs_video/ltx2_generation_speed_sweep/ltx2_speed_s8p3_g2_fp4on_fgoff/profile.log",
+        "profile_runs_partial": "outputs_video/ltx2_generation_speed_sweep/ltx2_speed_s8p3_g2_fp4on_fgoff/profile_runs_partial.json",
+        "profile_summary": "outputs_video/ltx2_generation_speed_sweep/ltx2_speed_s8p3_g2_fp4on_fgoff/profile_summary.json",
+        "run_dir": "outputs_video/ltx2_generation_speed_sweep/ltx2_speed_s8p3_g2_fp4on_fgoff",
+        "videos_dir": "outputs_video/ltx2_generation_speed_sweep/ltx2_speed_s8p3_g2_fp4on_fgoff/videos"
+      },
+      "run_name": "ltx2_speed_s8p3_g2_fp4on_fgoff",
+      "sp_size": 2,
+      "steps": {
+        "base": 8,
+        "label": "8+3",
+        "refine": 3
+      },
+      "tp_size": 1
+    },
+    {
+      "compile_fullgraph": true,
+      "fp4_linear": true,
+      "gpus": 2,
+      "measured_runs": 10,
+      "measured_start_run": 3,
+      "metrics_seconds": {
+        "PostDecodeFrameProcessStage": 0.09188975146971642,
+        "audio_decoding_stage": 0.02383451070636511,
+        "avg_e2e_latency": 5.704674434149638,
+        "avg_non_stage_overhead": 0.028483981965109706,
+        "avg_sr_forward_latency": 1.9773628002498298,
+        "avg_stage_sum": 5.676190452184528,
+        "avg_video_generation_time": 5.612174316868186,
+        "decoding_stage": 0.337678094394505,
+        "denoising_stage": 3.203738734917715,
+        "ltx2_refine_denoising_stage": 1.943003649637103,
+        "ltx2_upsample_stage": 0.034359150612726805,
+        "prompt_encoding_stage": 0.04134704326279461
+      },
+      "paths": {
+        "profile_config": "outputs_video/ltx2_generation_speed_sweep/ltx2_speed_s8p3_g2_fp4on_fgon/profile_config.json",
+        "profile_log": "outputs_video/ltx2_generation_speed_sweep/ltx2_speed_s8p3_g2_fp4on_fgon/profile.log",
+        "profile_runs_partial": "outputs_video/ltx2_generation_speed_sweep/ltx2_speed_s8p3_g2_fp4on_fgon/profile_runs_partial.json",
+        "profile_summary": "outputs_video/ltx2_generation_speed_sweep/ltx2_speed_s8p3_g2_fp4on_fgon/profile_summary.json",
+        "run_dir": "outputs_video/ltx2_generation_speed_sweep/ltx2_speed_s8p3_g2_fp4on_fgon",
+        "videos_dir": "outputs_video/ltx2_generation_speed_sweep/ltx2_speed_s8p3_g2_fp4on_fgon/videos"
+      },
+      "run_name": "ltx2_speed_s8p3_g2_fp4on_fgon",
+      "sp_size": 2,
+      "steps": {
+        "base": 8,
+        "label": "8+3",
+        "refine": 3
+      },
+      "tp_size": 1
+    },
+    {
+      "compile_fullgraph": false,
+      "fp4_linear": false,
+      "gpus": 4,
+      "measured_runs": 10,
+      "measured_start_run": 3,
+      "metrics_seconds": {
+        "PostDecodeFrameProcessStage": 0.0926723656244576,
+        "audio_decoding_stage": 0.02038909853436053,
+        "avg_e2e_latency": 3.659577368339524,
+        "avg_non_stage_overhead": 0.032996845338493584,
+        "avg_sr_forward_latency": 1.4074678926728665,
+        "avg_stage_sum": 3.62658052300103,
+        "avg_video_generation_time": 3.5662845633924007,
+        "decoding_stage": 0.33684914037585256,
+        "denoising_stage": 1.7269158885814249,
+        "ltx2_refine_denoising_stage": 1.3731521332636476,
+        "ltx2_upsample_stage": 0.03431575940921903,
+        "prompt_encoding_stage": 0.04198045386001468
+      },
+      "paths": {
+        "profile_config": "outputs_video/ltx2_generation_speed_sweep/ltx2_speed_s8p3_g4_fp4off_fgoff/profile_config.json",
+        "profile_log": "outputs_video/ltx2_generation_speed_sweep/ltx2_speed_s8p3_g4_fp4off_fgoff/profile.log",
+        "profile_runs_partial": "outputs_video/ltx2_generation_speed_sweep/ltx2_speed_s8p3_g4_fp4off_fgoff/profile_runs_partial.json",
+        "profile_summary": "outputs_video/ltx2_generation_speed_sweep/ltx2_speed_s8p3_g4_fp4off_fgoff/profile_summary.json",
+        "run_dir": "outputs_video/ltx2_generation_speed_sweep/ltx2_speed_s8p3_g4_fp4off_fgoff",
+        "videos_dir": "outputs_video/ltx2_generation_speed_sweep/ltx2_speed_s8p3_g4_fp4off_fgoff/videos"
+      },
+      "run_name": "ltx2_speed_s8p3_g4_fp4off_fgoff",
+      "sp_size": 4,
+      "steps": {
+        "base": 8,
+        "label": "8+3",
+        "refine": 3
+      },
+      "tp_size": 1
+    },
+    {
+      "compile_fullgraph": true,
+      "fp4_linear": false,
+      "gpus": 4,
+      "measured_runs": 10,
+      "measured_start_run": 3,
+      "metrics_seconds": {
+        "PostDecodeFrameProcessStage": 0.10089150085113943,
+        "audio_decoding_stage": 0.02161898324266076,
+        "avg_e2e_latency": 3.7939023894723505,
+        "avg_non_stage_overhead": 0.03712318907491863,
+        "avg_sr_forward_latency": 1.4075526508968323,
+        "avg_stage_sum": 3.756779200397432,
+        "avg_video_generation_time": 3.6924117451068015,
+        "decoding_stage": 0.3391511988826096,
+        "denoising_stage": 1.8455733176786453,
+        "ltx2_refine_denoising_stage": 1.3732683095149696,
+        "ltx2_upsample_stage": 0.03428434138186276,
+        "prompt_encoding_stage": 0.04168303646147251
+      },
+      "paths": {
+        "profile_config": "outputs_video/ltx2_generation_speed_sweep/ltx2_speed_s8p3_g4_fp4off_fgon/profile_config.json",
+        "profile_log": "outputs_video/ltx2_generation_speed_sweep/ltx2_speed_s8p3_g4_fp4off_fgon/profile.log",
+        "profile_runs_partial": "outputs_video/ltx2_generation_speed_sweep/ltx2_speed_s8p3_g4_fp4off_fgon/profile_runs_partial.json",
+        "profile_summary": "outputs_video/ltx2_generation_speed_sweep/ltx2_speed_s8p3_g4_fp4off_fgon/profile_summary.json",
+        "run_dir": "outputs_video/ltx2_generation_speed_sweep/ltx2_speed_s8p3_g4_fp4off_fgon",
+        "videos_dir": "outputs_video/ltx2_generation_speed_sweep/ltx2_speed_s8p3_g4_fp4off_fgon/videos"
+      },
+      "run_name": "ltx2_speed_s8p3_g4_fp4off_fgon",
+      "sp_size": 4,
+      "steps": {
+        "base": 8,
+        "label": "8+3",
+        "refine": 3
+      },
+      "tp_size": 1
+    },
+    {
+      "compile_fullgraph": false,
+      "fp4_linear": true,
+      "gpus": 4,
+      "measured_runs": 10,
+      "measured_start_run": 3,
+      "metrics_seconds": {
+        "PostDecodeFrameProcessStage": 0.10522685679607094,
+        "audio_decoding_stage": 0.02251307819969952,
+        "avg_e2e_latency": 5.401822618115693,
+        "avg_non_stage_overhead": 0.036149418400600555,
+        "avg_sr_forward_latency": 1.6356347330845893,
+        "avg_stage_sum": 5.365673199715092,
+        "avg_video_generation_time": 5.296058096596971,
+        "decoding_stage": 0.33500022408552466,
+        "denoising_stage": 3.2245697668287905,
+        "ltx2_refine_denoising_stage": 1.600917282421142,
+        "ltx2_upsample_stage": 0.03471745066344738,
+        "prompt_encoding_stage": 0.042411711532622576
+      },
+      "paths": {
+        "profile_config": "outputs_video/ltx2_generation_speed_sweep/ltx2_speed_s8p3_g4_fp4on_fgoff/profile_config.json",
+        "profile_log": "outputs_video/ltx2_generation_speed_sweep/ltx2_speed_s8p3_g4_fp4on_fgoff/profile.log",
+        "profile_runs_partial": "outputs_video/ltx2_generation_speed_sweep/ltx2_speed_s8p3_g4_fp4on_fgoff/profile_runs_partial.json",
+        "profile_summary": "outputs_video/ltx2_generation_speed_sweep/ltx2_speed_s8p3_g4_fp4on_fgoff/profile_summary.json",
+        "run_dir": "outputs_video/ltx2_generation_speed_sweep/ltx2_speed_s8p3_g4_fp4on_fgoff",
+        "videos_dir": "outputs_video/ltx2_generation_speed_sweep/ltx2_speed_s8p3_g4_fp4on_fgoff/videos"
+      },
+      "run_name": "ltx2_speed_s8p3_g4_fp4on_fgoff",
+      "sp_size": 4,
+      "steps": {
+        "base": 8,
+        "label": "8+3",
+        "refine": 3
+      },
+      "tp_size": 1
+    },
+    {
+      "compile_fullgraph": true,
+      "fp4_linear": true,
+      "gpus": 4,
+      "measured_runs": 10,
+      "measured_start_run": 3,
+      "metrics_seconds": {
+        "PostDecodeFrameProcessStage": 0.1005361630115658,
+        "audio_decoding_stage": 0.02151531483978033,
+        "avg_e2e_latency": 5.332755102124065,
+        "avg_non_stage_overhead": 0.03256337773054838,
+        "avg_sr_forward_latency": 1.6181688847485929,
+        "avg_stage_sum": 5.300191724393517,
+        "avg_video_generation_time": 5.2315825577359645,
+        "decoding_stage": 0.335940445959568,
+        "denoising_stage": 3.182710621645674,
+        "ltx2_refine_denoising_stage": 1.5834324596449734,
+        "ltx2_upsample_stage": 0.0347364251036197,
+        "prompt_encoding_stage": 0.04100001510232687
+      },
+      "paths": {
+        "profile_config": "outputs_video/ltx2_generation_speed_sweep/ltx2_speed_s8p3_g4_fp4on_fgon/profile_config.json",
+        "profile_log": "outputs_video/ltx2_generation_speed_sweep/ltx2_speed_s8p3_g4_fp4on_fgon/profile.log",
+        "profile_runs_partial": "outputs_video/ltx2_generation_speed_sweep/ltx2_speed_s8p3_g4_fp4on_fgon/profile_runs_partial.json",
+        "profile_summary": "outputs_video/ltx2_generation_speed_sweep/ltx2_speed_s8p3_g4_fp4on_fgon/profile_summary.json",
+        "run_dir": "outputs_video/ltx2_generation_speed_sweep/ltx2_speed_s8p3_g4_fp4on_fgon",
+        "videos_dir": "outputs_video/ltx2_generation_speed_sweep/ltx2_speed_s8p3_g4_fp4on_fgon/videos"
+      },
+      "run_name": "ltx2_speed_s8p3_g4_fp4on_fgon",
+      "sp_size": 4,
+      "steps": {
+        "base": 8,
+        "label": "8+3",
+        "refine": 3
+      },
+      "tp_size": 1
+    }
+  ],
+  "status": "completed",
+  "validation": {
+    "config_mismatches": 0,
+    "expected_cells": 24,
+    "failed_cells": 0,
+    "saved_mp4_files": 0,
+    "successful_cells": 24
+  }
+}
